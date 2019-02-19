@@ -1,0 +1,5 @@
+name: UltimateGuns
+version: 1.0
+main: com.samcymbaluk.ultimateguns.UltimateGuns
+api-version: 1.13
+
