@@ -57,4 +57,9 @@ public class LivingEntityTarget extends Target {
         }
         return false;
     }
+
+    @Override
+    public int hashCode() {
+        return entity.hashCode();
+    }
 }

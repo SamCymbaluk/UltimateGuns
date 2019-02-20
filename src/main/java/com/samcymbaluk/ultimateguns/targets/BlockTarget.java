@@ -103,5 +103,8 @@ public class BlockTarget extends Target {
         return false;
     }
 
-
+    @Override
+    public int hashCode() {
+        return block.hashCode();
+    }
 }

@@ -1,6 +1,7 @@
 package com.samcymbaluk.ultimateguns.grenades;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
+import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.GunUtil;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
@@ -44,18 +45,6 @@ public class GrenadeProjectile {
 
     private boolean ended = false;
 
-    private static final Map<Material, Double> restitutionModifiers = new HashMap<Material, Double>(){{
-        put(Material.GRASS, 0.2);
-        put(Material.DIRT, 0.2);
-        put(Material.SAND, 0.05);
-        put(Material.ACACIA_LEAVES, 0.05);
-        put(Material.BIRCH_LEAVES, 0.05);
-        put(Material.DARK_OAK_LEAVES, 0.05);
-        put(Material.JUNGLE_LEAVES, 0.05);
-        put(Material.OAK_LEAVES, 0.05);
-        put(Material.SPRUCE_LEAVES, 0.05);
-    }};
-
     public GrenadeProjectile(Entity ent, Location loc, Grenade grenade, Material material) {
         this.material = material;
         this.ent = ent;
@@ -84,7 +73,7 @@ public class GrenadeProjectile {
     private void step(Vector path, Location start, EntityArmorStand stand) {
         grenade.onTick(start, tick);
 
-        RayTraceResult rtResult = Target.rayTrace(start, path, path.length(), Collections.singleton(grenade.getThrower()));
+        RayTraceResult rtResult = Target.rayTrace(start, path, path.length(), Collections.singleton(new LivingEntityTarget(grenade.getThrower())));
         Location newStart = rtResult != null
                 ? rtResult.getHitPosition().toLocation(start.getWorld())
                 : start.add(path.clone().normalize().multiply(path.length()));

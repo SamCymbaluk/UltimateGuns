@@ -11,11 +11,8 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
 
 public abstract class Target {
 
@@ -37,13 +34,16 @@ public abstract class Target {
     public static RayTraceResult rayTrace(Location start, Vector direction, double maxDistance, Collection<Target> ignoredTargets) {
         // TODO custom target logic
 
+        if (direction.lengthSquared() < 1e-5 || maxDistance == 0) return null;
+
         // Look for block collisions
         RayTraceResult blockRayTrace = null;
         BlockIterator bIterator = new BlockIterator(start.getWorld(), start.toVector(), direction, 0, (int) Math.ceil(maxDistance));
+
         while(bIterator.hasNext()) {
 
             Block block = bIterator.next();
-            if (!ignoredTargets.contains(new BlockTarget(block))) {
+            if (!ignoredTargets.contains(new BlockTarget(block)) && !block.isPassable()) {
 
                 RayTraceResult res = block.rayTrace(start, direction, maxDistance, FluidCollisionMode.ALWAYS);
                 if (res != null) {

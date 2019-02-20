@@ -1,23 +1,26 @@
 package com.samcymbaluk.ultimateguns.grenades.frag;
 
+import com.samcymbaluk.ultimateguns.UltimateGunsProjectile;
 import com.samcymbaluk.ultimateguns.grenades.Grenade;
+import com.samcymbaluk.ultimateguns.targets.BlockTarget;
+import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
+import com.samcymbaluk.ultimateguns.targets.Target;
+import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.BlockIterator;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class Frag extends Grenade {
 
@@ -41,47 +44,36 @@ public class Frag extends Grenade {
 
     public void explode(Location loc) {
         Location center = loc.getBlock().getLocation().add(0.5, 0.5, 0.5);
-        Map<Block, ArrayList<LivingEntity>> targets = new HashMap<>();
-
-        loc.getWorld().getNearbyEntities(loc, 11, 11, 11).stream().filter(LivingEntity.class::isInstance).forEach(ent -> {
-            Block b = ent.getLocation().getBlock();
-            if (targets.containsKey(b)) {
-                ArrayList<LivingEntity> ents = targets.get(b);
-                ents.add(((LivingEntity) ent));
-                targets.replace(b, ents);
-            } else {
-                ArrayList<LivingEntity> ents = new ArrayList<>();
-                ents.add((LivingEntity) ent);
-                targets.put(ent.getLocation().getBlock(), ents);
-            }
-        });
-
-        List<LivingEntity> hitTargets = new ArrayList<>();
-
+        Set<Target> hitTargets = new HashSet<>();
         Vector start = center.toVector();
-        List<Vector> vectors = getExplosionVectors(start.clone(), 10, 10, 10, false);
-        for (Vector path : vectors) {
-            BlockIterator iterator = new BlockIterator(loc.getWorld(), start, path, 0, (int) Math.ceil(path.length()));
-            while (iterator.hasNext()) {
-                Block b = iterator.next();
-                if (targets.containsKey(b)) {
-                    hitTargets.addAll(targets.get(b));
-                    targets.remove(b);
+
+        List<Vector> vectors = getExplosionVectors(start.clone(), 3, 3, 3, false);
+
+        for (Vector vector : vectors) {
+            UltimateGunsProjectile proj = new UltimateGunsProjectile(getThrower(), true, 20, 0.25, 200);
+            proj.start(center, vector, new ProjectileCallback() {
+                @Override
+                public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
+
+                    hitTargets.add(target);
+                    target.onHit(getThrower(), 30 - (2.5 * center.distance(target.getLocation())));
+                    if (target instanceof BlockTarget) {
+                        //return new Vector(0, 0, 0);
+                    }
+
+                    return path;
                 }
-                if (b.getType().isSolid()) break;
-            }
-        }
 
-        for (LivingEntity ent : hitTargets) {
-            ent.damage(30 - (2.5 * center.distance(ent.getLocation())), getThrower());
-            ent.setVelocity(ent.getLocation().toVector().subtract(start.clone()).normalize());
-            if (ent instanceof Player) {
-                Player player = (Player) ent;
-                player.playSound(player.getEyeLocation(), Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, 1, 1);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10, 10));
-            }
-        }
+                @Override
+                public void handleStep(Location start, Vector path) {
+                    proj.debugProjectileEffect(start.toVector(), start.toVector().add(path));
+                }
 
+                @Override
+                public void done(Location end) {
+                }
+            });
+        }
     }
 
     public List<Vector> getExplosionVectors(Vector pos, double radiusX, double radiusY, double radiusZ, boolean filled) {
