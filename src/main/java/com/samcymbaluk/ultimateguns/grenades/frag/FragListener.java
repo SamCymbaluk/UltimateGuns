@@ -6,6 +6,7 @@ import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -44,20 +45,27 @@ public class FragListener implements Listener {
 
             // TODO remove debug
             if (item.getType() == Material.GOLD_INGOT) {
-                UltimateGunsProjectile proj = new UltimateGunsProjectile(player, true, 10, 0.25, 200);
+                UltimateGunsProjectile proj = new UltimateGunsProjectile(player, true, 715./20., 0.25, 255);
                 proj.start(player.getEyeLocation(), player.getEyeLocation().getDirection(), new ProjectileCallback() {
+                    double penLeft = 70;
+
                     @Override
                     public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
                         if (target instanceof LivingEntityTarget) {
                             target.onHit(event.getPlayer(), 100);
                         } else if (target instanceof BlockTarget) {
-                            return path.multiply(0);
+                            penLeft -= 25;
+                            if (penLeft <= 0) proj.kill();
+                            path.multiply(((float) (30 - 25)) / ((float) 30));
+                            Vector deflection = new Vector(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+                            path.add(deflection.normalize().multiply(Math.sqrt(25) / 2));
+                            return path;
                         }
                         return path;
                     }
 
                     @Override
-                    public void handleStep(Location start, Vector path) {
+                    public void handleStep(Location start, Vector path, double velocity) {
                         proj.debugProjectileEffect(start.toVector(), start.toVector().add(path));
                     }
 

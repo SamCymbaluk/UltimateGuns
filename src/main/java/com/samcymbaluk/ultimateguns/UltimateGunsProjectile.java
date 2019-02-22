@@ -12,6 +12,9 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UltimateGunsProjectile {
 
@@ -23,7 +26,7 @@ public class UltimateGunsProjectile {
 
     private Location loc;
     private ProjectileCallback callback;
-    private double totalDistance = 0;
+    private boolean killed = false;
 
     /**
      * @param owner
@@ -44,89 +47,75 @@ public class UltimateGunsProjectile {
         this.loc = loc;
         this.callback = callback;
 
-        step(loc.toVector(), direction.normalize(), initialVelocity, initialVelocity, ignoreOwner ? new LivingEntityTarget(owner) : null);
+        step(loc.clone(), direction.normalize().multiply(initialVelocity), 0, ignoreOwner ? new LivingEntityTarget(owner) : null);
+
     }
 
-
-    /**
-     *
-     * @param start Where the project begins the step from
-     * @param path The normalized direction
-     * @param velocity The velocity of the projectile in metres per tick
-     * @param distLeft The distance left to travel this tick
-     * @param ignoredTarget A target that should be ignored (or null)
-     */
-    private void step(Vector start, Vector path, double velocity, double distLeft, Target ignoredTarget) {
-        // Max distance check
-
-        System.out.println("Distance: " + totalDistance);
-        System.out.println("Velocity: " + velocity);
-        if (totalDistance + distLeft > maxDistance) {
-            distLeft = maxDistance - totalDistance;
+    private void step(Location start, Vector path, double totalDistance, Target ignored) {
+        double distance = path.length();
+        if (totalDistance + distance > maxDistance) {
+            distance = maxDistance - totalDistance;
         }
+        path.normalize().multiply(distance);
 
-        // Distance left stoppage
-        if (distLeft <= 0) {
-            callback.done(start.toLocation(loc.getWorld()));
+        // Distance termination
+        if (distance <= 1e-3) {
+            callback.done(start);
             return;
         }
 
-        // Velocity stoppage
-        if (velocity < 0.05) {
-            callback.done(start.toLocation(loc.getWorld()));
-            return;
+        Set<Target> ignoredTargets = new HashSet<>();
+        ignoredTargets.add(ignored);
+
+        RayTraceResult rtResult;
+        double tickElapsed = 0;
+        while ((rtResult = Target.rayTrace(start, path, path.length() * (1 - tickElapsed), ignoredTargets)) != null && tickElapsed < 0.99) {
+            Target target = Target.fromRayTrace(rtResult);
+            Vector newPath = callback.handleImpact(rtResult, target, path.clone());
+            Location newStart = rtResult.getHitPosition().toLocation(loc.getWorld());
+
+            callback.handleStep(start, newStart.clone().subtract(start).toVector(), path.length());
+
+            // t = d/v
+            tickElapsed += newStart.toVector().subtract(start.toVector()).length() / path.length();
+
+            ignoredTargets.add(target);
+            ignored = target;
+            path = newPath;
+            start = newStart;
         }
 
-        RayTraceResult rtResult = Target.rayTrace(start.toLocation(loc.getWorld()), path, velocity, Collections.singleton(ignoredTarget));
-        Target target = Target.fromRayTrace(rtResult);
-
-        Vector newPath = path.clone();
-        Vector newStart = start.clone().add(path.clone().multiply(distLeft));
-
-        // Handle collision if it occurred
-        if (rtResult != null) {
-
-            newPath = callback.handleImpact(rtResult, target, path.clone().multiply(velocity));
-            velocity = newPath.length();
-            newPath.normalize();
-
-            newStart = rtResult.getHitPosition();
+        // No collisions
+        if (tickElapsed == 0) {
+            callback.handleStep(start, path, path.length());
+            start.add(path);
         }
 
-        // Calculate distance travelled this step
-        double distanceTravelled = start.clone().subtract(newStart).length();
+        //Gravity
+        path.add(new Vector(0, -gravity, 0));
 
-        System.out.println(distanceTravelled);
+        // New step variables
+        Location newStart = start;
+        Vector newPath = path;
+        double newTotalDistance = totalDistance + distance;
+        Target newIgnored = ignored;
+        Bukkit.getScheduler().scheduleSyncDelayedTask(UltimateGuns.getInstance(), () -> {
+            if (!killed) step(newStart, newPath, newTotalDistance, newIgnored);
+        }, 1);
+    }
 
-        // Gravity
-        newPath.add(new Vector(0, -gravity*(distanceTravelled/velocity), 0));
-
-        // Update distance travelled
-        totalDistance += distanceTravelled;
-
-        // Call next iteration of step
-        callback.handleStep(start.toLocation(loc.getWorld()), newStart.clone().subtract(start));
-        final Vector nextStart = newStart;
-        final Vector nextPath = newPath;
-        final double vel = velocity;
-        if (distanceTravelled < distLeft - 0.01) {
-            // More to do in same tick
-            step(nextStart, nextPath, vel, distLeft - distanceTravelled, target);
-        } else {
-            // New tick -> Reset distLeft
-            Bukkit.getScheduler().scheduleSyncDelayedTask(UltimateGuns.getInstance(), () -> step(nextStart, nextPath, vel, vel, target), 1);
-        }
+    public void kill() {
+        this.killed = true;
     }
 
     public void debugProjectileEffect(Vector start, Vector end) {
         Vector path = end.clone().subtract(start);
-        for (double i = 0; i < path.length(); i += 5) {
+        for (double i = 0; i < path.length(); i += 2.5) {
 
             Vector pos = start.clone().add(path.clone().normalize().multiply(i));
             for (Player p : loc.getWorld().getPlayers()) {
                 loc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, pos.toLocation(p.getWorld()), 1, 0, 0, 0, 0, null, true);
             }
-            break;
 
         }
     }

@@ -3,17 +3,13 @@ package com.samcymbaluk.ultimateguns.grenades.frag;
 import com.samcymbaluk.ultimateguns.UltimateGunsProjectile;
 import com.samcymbaluk.ultimateguns.grenades.Grenade;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
-import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
@@ -47,26 +43,25 @@ public class Frag extends Grenade {
         Set<Target> hitTargets = new HashSet<>();
         Vector start = center.toVector();
 
-        List<Vector> vectors = getExplosionVectors(start.clone(), 3, 3, 3, false);
-
+        List<Vector> vectors = getExplosionVectors(start.clone(), 10, 10, 10, false);
         for (Vector vector : vectors) {
-            UltimateGunsProjectile proj = new UltimateGunsProjectile(getThrower(), true, 20, 0.25, 200);
+            UltimateGunsProjectile proj = new UltimateGunsProjectile(getThrower(), true, 50, 0, 20);
             proj.start(center, vector, new ProjectileCallback() {
                 @Override
                 public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
-
-                    hitTargets.add(target);
-                    target.onHit(getThrower(), 30 - (2.5 * center.distance(target.getLocation())));
+                    if (!hitTargets.contains(target)) {
+                        target.onHit(getThrower(), 30 - (2.5 * center.distance(target.getLocation())));
+                        hitTargets.add(target);
+                    }
                     if (target instanceof BlockTarget) {
-                        //return new Vector(0, 0, 0);
+                        proj.kill();
                     }
 
                     return path;
                 }
 
                 @Override
-                public void handleStep(Location start, Vector path) {
-                    proj.debugProjectileEffect(start.toVector(), start.toVector().add(path));
+                public void handleStep(Location start, Vector path, double velocity) {
                 }
 
                 @Override

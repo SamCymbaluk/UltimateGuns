@@ -34,17 +34,35 @@ public abstract class Target {
     public static RayTraceResult rayTrace(Location start, Vector direction, double maxDistance, Collection<Target> ignoredTargets) {
         // TODO custom target logic
 
-        if (direction.lengthSquared() < 1e-5 || maxDistance == 0) return null;
+        if (direction.lengthSquared() < 1e-5 || maxDistance <= 1e-5) return null;
+
+        // TODO IllegalStateException occurs when close to edge of block (e.g. -662.9999999999998,61.99999999999981,-1220.0)
+        double distFromBlock = start.getBlock().getLocation().distanceSquared(start);
+        if (Math.abs(Math.round(distFromBlock) - distFromBlock) <= 1e-5) {
+            start.add(0.001, 0.001, 0.001);
+        }
 
         // Look for block collisions
         RayTraceResult blockRayTrace = null;
-        BlockIterator bIterator = new BlockIterator(start.getWorld(), start.toVector(), direction, 0, (int) Math.ceil(maxDistance));
+
+        BlockIterator bIterator;
+        try {
+            bIterator = new BlockIterator(start.getWorld(), start.toVector(), direction, 0, (int) Math.ceil(maxDistance));
+        } catch (IllegalStateException ex) {
+            System.out.println("Location: " + start.toVector());
+            System.out.println("Direction: " + direction);
+            System.out.println("Max Distance: " + maxDistance);
+            System.out.println("From block: " + start.getBlock().getLocation().distanceSquared(start));
+            return null;
+        }
 
         while(bIterator.hasNext()) {
 
             Block block = bIterator.next();
-            if (!ignoredTargets.contains(new BlockTarget(block)) && !block.isPassable()) {
+            // First perform a rough collision check with BlockIterator
+            if (!ignoredTargets.contains(new BlockTarget(block)) && !block.isEmpty()) {
 
+                // Now check if the collision still occurs with the precise collision geometry of the block
                 RayTraceResult res = block.rayTrace(start, direction, maxDistance, FluidCollisionMode.ALWAYS);
                 if (res != null) {
                     blockRayTrace = res;

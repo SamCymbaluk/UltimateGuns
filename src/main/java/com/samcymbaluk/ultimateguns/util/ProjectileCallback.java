@@ -1,6 +1,7 @@
 package com.samcymbaluk.ultimateguns.util;
 
 import com.samcymbaluk.ultimateguns.targets.Target;
+import jdk.internal.net.http.common.Pair;
 import org.bukkit.Location;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
@@ -11,7 +12,7 @@ public interface ProjectileCallback {
      *
      * @param impact The impact information
      * @param target The impacted target information
-     * @param path The magnitude (velocity) and direction of the projectile when the impact occurred
+     * @param path The direction and magnitude (velocity) of the projectile when the impact occurred
      * @return A vector representing the magnitude (velocity) and direction the projectile should now have
      */
     Vector handleImpact(RayTraceResult impact, Target target, Vector path);
@@ -20,8 +21,9 @@ public interface ProjectileCallback {
      *
      * @param start The position of the projectile at the start of this step
      * @param path The path the projectile took this step
+     * @param velocity The velocity the projectile was travelling during this step
      */
-    void handleStep(Location start, Vector path);
+    void handleStep(Location start, Vector path, double velocity);
 
     void done(Location end);
 }
