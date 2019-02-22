@@ -69,19 +69,26 @@ public class UltimateGunsProjectile {
 
         RayTraceResult rtResult;
         double tickElapsed = 0;
-        while ((rtResult = Target.rayTrace(start, path, path.length() * (1 - tickElapsed), ignoredTargets)) != null && tickElapsed < 0.99) {
+        double pathLength = path.length();
+        // Loop while there is a target and there is still (simulated) tick time left
+        while ((rtResult = Target.rayTrace(start, path, pathLength * (1 - tickElapsed), ignoredTargets::contains)) != null && tickElapsed < 0.99) {
             Target target = Target.fromRayTrace(rtResult);
             Vector newPath = callback.handleImpact(rtResult, target, path.clone());
             Location newStart = rtResult.getHitPosition().toLocation(loc.getWorld());
 
-            callback.handleStep(start, newStart.clone().subtract(start).toVector(), path.length());
+            callback.handleStep(start, newStart.clone().subtract(start).toVector(), pathLength);
+
+            // Killed short circuit
+            if (killed) return;
 
             // t = d/v
-            tickElapsed += newStart.toVector().subtract(start.toVector()).length() / path.length();
+            tickElapsed += newStart.toVector().subtract(start.toVector()).length() / pathLength;
 
+            // Update iteration vars
             ignoredTargets.add(target);
             ignored = target;
             path = newPath;
+            pathLength = path.length();
             start = newStart;
         }
 

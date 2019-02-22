@@ -23,6 +23,7 @@ import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class GrenadeProjectile {
 
@@ -73,7 +75,7 @@ public class GrenadeProjectile {
     private void step(Vector path, Location start, EntityArmorStand stand) {
         grenade.onTick(start, tick);
 
-        RayTraceResult rtResult = Target.rayTrace(start, path, path.length(), Collections.singleton(new LivingEntityTarget(grenade.getThrower())));
+        RayTraceResult rtResult = Target.rayTrace(start, path, path.length(), rayTracePredicate());
         Location newStart = rtResult != null
                 ? rtResult.getHitPosition().toLocation(start.getWorld())
                 : start.add(path.clone().normalize().multiply(path.length()));
@@ -84,8 +86,6 @@ public class GrenadeProjectile {
         for (Player p : ent.getWorld().getPlayers()) {
             ((CraftPlayer) p).getHandle().playerConnection.sendPacket(teleport);
         }
-
-        //newStart.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, newStart.clone().add(0, 0.1, 0), 1, 0, 0,0, 0);
 
         //Hit a block, do impact calculation
         if (rtResult != null) {
@@ -126,6 +126,19 @@ public class GrenadeProjectile {
                 ((CraftPlayer) p).getHandle().playerConnection.sendPacket(kill);
             }
         }
+    }
+
+    private Predicate<Target> rayTracePredicate() {
+        return target -> {
+            if (target instanceof BlockTarget) {
+                BlockTarget bt = (BlockTarget) target;
+                return bt.getBlock().isPassable();
+            } else if (target instanceof LivingEntityTarget) {
+                LivingEntityTarget et = (LivingEntityTarget) target;
+                return et.getEntity().equals(grenade.getThrower());
+            }
+            return false;
+        };
     }
 
     /**

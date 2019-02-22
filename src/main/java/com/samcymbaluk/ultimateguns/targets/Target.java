@@ -10,9 +10,9 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Predicate;
 
 public abstract class Target {
 
@@ -28,10 +28,18 @@ public abstract class Target {
 
     public static RayTraceResult rayTrace(Location start, Vector direction, double maxDistance) {
         // TODO custom target logic
-        return rayTrace(start, direction, maxDistance, new HashSet<>());
+        return rayTrace(start, direction, maxDistance, null);
     }
 
-    public static RayTraceResult rayTrace(Location start, Vector direction, double maxDistance, Collection<Target> ignoredTargets) {
+    /**
+     *
+     * @param start
+     * @param direction
+     * @param maxDistance
+     * @param ignored Targets that meet this predicate will not be considered
+     * @return
+     */
+    public static RayTraceResult rayTrace(Location start, Vector direction, double maxDistance, Predicate<Target> ignored) {
         // TODO custom target logic
 
         if (direction.lengthSquared() < 1e-5 || maxDistance <= 1e-5) return null;
@@ -60,7 +68,7 @@ public abstract class Target {
 
             Block block = bIterator.next();
             // First perform a rough collision check with BlockIterator
-            if (!ignoredTargets.contains(new BlockTarget(block)) && !block.isEmpty()) {
+            if ((ignored == null || !ignored.test(new BlockTarget(block))) && !block.isEmpty()) {
 
                 // Now check if the collision still occurs with the precise collision geometry of the block
                 RayTraceResult res = block.rayTrace(start, direction, maxDistance, FluidCollisionMode.ALWAYS);
@@ -78,7 +86,7 @@ public abstract class Target {
                 start,
                 direction,
                 maxDistance,
-                entity -> entity instanceof LivingEntity && !ignoredTargets.contains(new LivingEntityTarget((LivingEntity) entity))
+                entity -> entity instanceof LivingEntity && (ignored == null || !ignored.test(new LivingEntityTarget((LivingEntity) entity)))
         );
 
         // Return closest RayTraceResult

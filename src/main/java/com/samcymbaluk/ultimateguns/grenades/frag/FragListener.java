@@ -47,19 +47,22 @@ public class FragListener implements Listener {
             if (item.getType() == Material.GOLD_INGOT) {
                 UltimateGunsProjectile proj = new UltimateGunsProjectile(player, true, 715./20., 0.25, 255);
                 proj.start(player.getEyeLocation(), player.getEyeLocation().getDirection(), new ProjectileCallback() {
-                    double penLeft = 70;
+                    double penLeft = 30;
 
                     @Override
                     public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
                         if (target instanceof LivingEntityTarget) {
                             target.onHit(event.getPlayer(), 100);
                         } else if (target instanceof BlockTarget) {
-                            penLeft -= 25;
-                            if (penLeft <= 0) proj.kill();
-                            path.multiply(((float) (30 - 25)) / ((float) 30));
-                            Vector deflection = new Vector(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
-                            path.add(deflection.normalize().multiply(Math.sqrt(25) / 2));
-                            return path;
+                            if (!((BlockTarget) target).getBlock().isPassable()) {
+                                double penLost = 2;
+                                penLeft -= penLost;
+                                if (penLeft <= 0) proj.kill();
+                                path.multiply(((float) (30 - penLost)) / ((float) 30));
+                                Vector deflection = new Vector(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+                                path.add(deflection.normalize().multiply(Math.sqrt(penLost) / 2));
+                                return path;
+                            }
                         }
                         return path;
                     }

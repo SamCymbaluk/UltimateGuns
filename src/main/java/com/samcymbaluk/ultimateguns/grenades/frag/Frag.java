@@ -21,7 +21,7 @@ import java.util.Set;
 public class Frag extends Grenade {
 
     public Frag(Player thrower) {
-        super(thrower, 25, Material.COAL);
+        super(thrower, 25, Material.COAL_BLOCK);
     }
 
     @Override
@@ -54,7 +54,9 @@ public class Frag extends Grenade {
                         hitTargets.add(target);
                     }
                     if (target instanceof BlockTarget) {
-                        proj.kill();
+                        BlockTarget bt = (BlockTarget) target;
+
+                        if (!bt.getBlock().isPassable()) proj.kill();
                     }
 
                     return path;
