@@ -44,7 +44,7 @@ public abstract class Target {
 
         if (direction.lengthSquared() < 1e-5 || maxDistance <= 1e-5) return null;
 
-        // TODO IllegalStateException occurs when close to edge of block (e.g. -662.9999999999998,61.99999999999981,-1220.0)
+        // TODO IllegalStateException occurs when (e.g.) close to edge of block (e.g. -662.9999999999998,61.99999999999981,-1220.0)
         double distFromBlock = start.getBlock().getLocation().distanceSquared(start);
         if (Math.abs(Math.round(distFromBlock) - distFromBlock) <= 1e-5) {
             start.add(0.001, 0.001, 0.001);
@@ -53,6 +53,7 @@ public abstract class Target {
         // Look for block collisions
         RayTraceResult blockRayTrace = null;
 
+        // TODO further investigation into IllegalStateExceptions in BlockIterator
         BlockIterator bIterator;
         try {
             bIterator = new BlockIterator(start.getWorld(), start.toVector(), direction, 0, (int) Math.ceil(maxDistance));

@@ -4,7 +4,9 @@ import com.samcymbaluk.ultimateguns.features.PluginFeature;
 
 public class FragFeature extends PluginFeature {
 
+    private FragListener fragListener;
+
     public FragFeature() {
-        new FragListener(this);
+        fragListener = new FragListener(this);
     }
 }

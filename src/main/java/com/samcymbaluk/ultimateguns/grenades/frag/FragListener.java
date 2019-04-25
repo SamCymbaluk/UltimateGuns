@@ -6,7 +6,6 @@ import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
-import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,7 +14,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.BlockIterator;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
@@ -33,13 +31,13 @@ public class FragListener implements Listener {
         Player player = event.getPlayer();
         if (!fragFeature.isEnabled(player.getWorld())) return;
 
-        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if (event.getAction() == Action.RIGHT_CLICK_AIR) {
             ItemStack item = player.getInventory().getItemInMainHand();
 
             // TODO make configurable
             if (item.getType() == Material.COAL) {
                 event.setCancelled(true);
-                Frag frag = new Frag(player);
+                FragGrenade frag = new FragGrenade(player);
                 frag.throwGrenade();
             }
 

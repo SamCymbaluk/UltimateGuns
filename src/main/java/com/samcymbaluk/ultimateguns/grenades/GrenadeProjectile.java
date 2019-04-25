@@ -3,7 +3,6 @@ package com.samcymbaluk.ultimateguns.grenades;
 import com.samcymbaluk.ultimateguns.UltimateGuns;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
-import com.samcymbaluk.ultimateguns.util.GunUtil;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import net.minecraft.server.v1_13_R2.EntityArmorStand;
 import net.minecraft.server.v1_13_R2.EnumItemSlot;
@@ -17,22 +16,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.function.Predicate;
 
 public class GrenadeProjectile {
@@ -43,7 +36,7 @@ public class GrenadeProjectile {
     private Grenade grenade;
 
     private int tick = 0;
-    EntityArmorStand stand;
+    private EntityArmorStand stand;
 
     private boolean ended = false;
 
@@ -69,10 +62,15 @@ public class GrenadeProjectile {
             ((CraftPlayer) p).getHandle().playerConnection.sendPacket(equipment);
         }
 
-        step(ent.getLocation().getDirection().multiply(velocity / 20.0), start, stand);
+        step(ent.getLocation().getDirection().multiply(velocity / 20.0), start);
     }
 
-    private void step(Vector path, Location start, EntityArmorStand stand) {
+    public Location getLocation() {
+        return this.loc;
+    }
+
+    private void step(Vector path, Location start) {
+        this.loc = start;
         grenade.onTick(start, tick);
 
         RayTraceResult rtResult = Target.rayTrace(start, path, path.length(), rayTracePredicate());
@@ -119,7 +117,7 @@ public class GrenadeProjectile {
 
         if (!ended) {
             tick += rtResult != null ? 3 : 1;
-            Bukkit.getScheduler().scheduleSyncDelayedTask(UltimateGuns.getInstance(), () -> step(path, newStart, stand), rtResult != null ? 3 : 1);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(UltimateGuns.getInstance(), () -> step(path, newStart), rtResult != null ? 3 : 1);
         } else {
             for (Player p : ent.getWorld().getPlayers()) {
                 PacketPlayOutEntityDestroy kill = new PacketPlayOutEntityDestroy(stand.getId());

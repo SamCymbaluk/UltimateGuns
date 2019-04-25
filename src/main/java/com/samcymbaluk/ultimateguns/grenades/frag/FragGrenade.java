@@ -18,9 +18,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Frag extends Grenade {
+public class FragGrenade extends Grenade {
 
-    public Frag(Player thrower) {
+    public FragGrenade(Player thrower) {
         super(thrower, 25, Material.COAL_BLOCK);
     }
 

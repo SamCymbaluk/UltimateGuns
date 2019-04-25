@@ -2,10 +2,9 @@ package com.samcymbaluk.ultimateguns.features;
 
 import com.samcymbaluk.ultimateguns.UltimateGunsConfig;
 import com.samcymbaluk.ultimateguns.grenades.frag.FragFeature;
+import com.samcymbaluk.ultimateguns.grenades.gas.GasFeature;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class PluginFeatures {
@@ -39,6 +38,9 @@ public class PluginFeatures {
     public void enableFeatures(UltimateGunsConfig config) {
         PluginFeature fragFeature = new FragFeature();
         fragFeature.enable("*");
+
+        PluginFeature gasFeature = new GasFeature();
+        gasFeature.enable("*");
     }
 
 
