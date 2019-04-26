@@ -1,13 +1,21 @@
 package com.samcymbaluk.ultimateguns.features;
 
+import com.samcymbaluk.ultimateguns.config.UltimateGunsConfig;
 import org.bukkit.World;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public abstract class PluginFeature {
 
     private Set<String> enabledWorlds = new HashSet<>();
+
+    public abstract String getName();
+
+    public abstract FeatureConfig getConfig();
+
+    public abstract void enable(UltimateGunsConfig config);
 
     public boolean isEnabled() {
         return !enabledWorlds.isEmpty();
@@ -21,19 +29,23 @@ public abstract class PluginFeature {
         return enabledWorlds.contains("*") || enabledWorlds.contains(world.getName());
     }
 
-    public void enable(String world) {
+    public void enableInWorld(String world) {
         enabledWorlds.add(world);
     }
 
-    public void enable(World world) {
+    public void enableInWorld(World world) {
         enabledWorlds.add(world.getName());
     }
 
-    public void disable(String world) {
+    public void enableInWorlds(List<String> worlds) {
+        enabledWorlds.addAll(worlds);
+    }
+
+    public void disableInWorld(String world) {
         enabledWorlds.remove(world);
     }
 
-    public void disable(World world) {
+    public void disableInWorld(World world) {
         enabledWorlds.remove(world.getName());
     }
 
