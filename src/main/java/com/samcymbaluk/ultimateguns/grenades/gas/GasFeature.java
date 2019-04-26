@@ -8,7 +8,7 @@ public class GasFeature extends PluginFeature {
     private GasListener gasListener;
 
     public GasFeature() {
-        this.gasManager = new GasManager();
+        this.gasManager = new GasManager(this);
         this.gasManager.start();
 
         this.gasListener = new GasListener(this, this.gasManager);

@@ -1,11 +1,14 @@
 package com.samcymbaluk.ultimateguns.grenades.gas;
 
 import com.google.common.collect.Lists;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +48,7 @@ public class GasBlock {
         Location pLoc = block.getLocation().add(0.5, 0.5, 0.5);
         int baseEffect = random.nextInt(5) == 0 ? 1 : 0;
 
-        // Density scalingLetterkenny, Ontario K0J 2E0
+        // Density scaling
         for (int i = 0; i < (density / 4) + baseEffect; i++) {
             if (i > 50) break;
             block.getWorld().spawnParticle(Particle.SPELL_MOB,
@@ -112,10 +115,28 @@ public class GasBlock {
 
         List<Block> spreadBlocks = new ArrayList<>();
         for (Block b : surroundings) {
-            if (b.isPassable()) spreadBlocks.add(b);
+            if (canSpread(b)) spreadBlocks.add(b);
         }
 
         return spreadBlocks;
+    }
+
+    private boolean canSpread(Block dest) {
+        // Passable optimization
+        if (block.isPassable() && dest.isPassable()) {
+            return true;
+        } else {
+            // Ray trace from middle to middle
+            Location start = block.getLocation().add(0.5, 0.5, 0.5);
+            Location end = dest.getLocation().add(0.5, 0.5, 0.5);
+            Vector dir = end.subtract(start).toVector();
+            double dist = start.distance(end);
+
+            RayTraceResult srcRt = block.rayTrace(start, dir, dist, FluidCollisionMode.NEVER);
+            RayTraceResult destRt = dest.rayTrace(start, dir, dist, FluidCollisionMode.NEVER);
+
+            return srcRt == null && destRt == null;
+        }
     }
 
     private int compareBlocksAsGas(Block b1, Block b2) {
