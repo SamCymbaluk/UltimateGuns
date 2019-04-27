@@ -1,14 +1,12 @@
 package com.samcymbaluk.ultimateguns.grenades.frag;
 
-import com.samcymbaluk.ultimateguns.config.UltimateGunsConfig;
-import com.samcymbaluk.ultimateguns.features.FeatureConfig;
 import com.samcymbaluk.ultimateguns.features.PluginFeature;
 
-public class FragFeature extends PluginFeature {
+public class FragFeature extends PluginFeature<FragFeatureConfig> {
 
     private final String name = "frag";
 
-    private UltimateGunsConfig config;
+    private FragFeatureConfig config;
 
     private FragListener fragListener;
 
@@ -16,16 +14,20 @@ public class FragFeature extends PluginFeature {
         return name;
     }
 
-    public FeatureConfig getDefaultConfig() {
+    public Class<FragFeatureConfig> configClass() {
+        return FragFeatureConfig.class;
+    }
+
+    public FragFeatureConfig defaultConfig() {
         return new FragFeatureConfig();
     }
 
-    public void enable(UltimateGunsConfig config) {
+    public void enable(FragFeatureConfig config) {
         this.config = config;
         fragListener = new FragListener(this);
     }
 
     public FragFeatureConfig getConfig() {
-        return (FragFeatureConfig) this.config.getFeatureConfig(name);
+        return config;
     }
 }

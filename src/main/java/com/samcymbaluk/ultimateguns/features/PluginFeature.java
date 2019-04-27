@@ -1,21 +1,26 @@
 package com.samcymbaluk.ultimateguns.features;
 
-import com.samcymbaluk.ultimateguns.config.UltimateGunsConfig;
 import org.bukkit.World;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class PluginFeature {
+public abstract class PluginFeature<T> {
 
     private Set<String> enabledWorlds = new HashSet<>();
 
+
+
     public abstract String getName();
 
-    public abstract FeatureConfig getDefaultConfig();
+    public abstract Class<T> configClass();
 
-    public abstract void enable(UltimateGunsConfig config);
+    public abstract T defaultConfig();
+
+    public abstract void enable(T config);
+
+    public abstract T getConfig();
 
     public boolean isEnabled() {
         return !enabledWorlds.isEmpty();

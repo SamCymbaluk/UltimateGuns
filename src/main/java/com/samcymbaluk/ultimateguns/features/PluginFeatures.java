@@ -1,14 +1,21 @@
 package com.samcymbaluk.ultimateguns.features;
 
+import com.samcymbaluk.ultimateguns.UltimateGuns;
 import com.samcymbaluk.ultimateguns.config.UltimateGunsConfig;
-import com.samcymbaluk.ultimateguns.config.UltimateGunsConfigLoader;
+import com.samcymbaluk.ultimateguns.config.ConfigLoader;
 import com.samcymbaluk.ultimateguns.grenades.frag.FragFeature;
 import com.samcymbaluk.ultimateguns.grenades.gas.GasFeature;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PluginFeatures {
+
+    public static String DIR_NAME = "features";
 
     private static PluginFeatures instance;
 
@@ -27,34 +34,46 @@ public class PluginFeatures {
     /**
      * TODO
      */
-    public void setupFeatures(UltimateGunsConfigLoader configLoader) {
+    public void setupFeatures() {
         features = new HashMap<>();
 
-        setupFeature(new FragFeature(), configLoader);
-        setupFeature(new GasFeature(), configLoader);
+        setupFeature(new FragFeature());
+        setupFeature(new GasFeature());
     }
 
-    private void setupFeature(PluginFeature feature, UltimateGunsConfigLoader configLoader) {
+    private void setupFeature(PluginFeature feature) {
         features.put(feature.getName(), feature);
-        configLoader.registerFeatureConfig(feature.getDefaultConfig());
     }
 
     public  Map<String, PluginFeature> getFeatures() {
         return features;
-    };
-
-
-    /**
-     * TODO
-     * @param config
-     */
-    public void enableFeatures(UltimateGunsConfig config) {
-        for (Map.Entry<String, PluginFeature> entry : features.entrySet()) {
-            entry.getValue().enableInWorlds(config.getFeatureConfig(entry.getKey()).getEnabledWorlds());
-            entry.getValue().enable(config);
-        }
     }
 
+    public void enableFeatures() {
+        File featureDir = new File(UltimateGuns.getInstance().getDataFolder().getPath() + File.separator + DIR_NAME);
+        featureDir.mkdir();
 
+        for (Map.Entry<String, PluginFeature> entry : features.entrySet()) {
+            String name = entry.getKey();
+            PluginFeature feature = entry.getValue();
 
+            try {
+                File featureConfigFile = new File(UltimateGuns.getInstance().getDataFolder().getPath() + File.separator
+                        + DIR_NAME
+                        + File.separator + name + ".json");
+
+                // This all works, but the typing is a little strange. Consider getting someone more versed in the Java
+                // type system to review it at a future date
+                feature.enable(ConfigLoader.loadConfig(feature.configClass(), featureConfigFile, feature.defaultConfig()));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                UltimateGuns.getInstance().getLogger().severe(String.format("Unable to load config for \"%s\" feature", name));
+                continue;
+            }
+
+            // TODO
+            feature.enableInWorlds(Arrays.asList("*"));
+
+        }
+    }
 }

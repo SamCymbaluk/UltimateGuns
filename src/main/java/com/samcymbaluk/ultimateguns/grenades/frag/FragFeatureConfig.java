@@ -1,9 +1,8 @@
 package com.samcymbaluk.ultimateguns.grenades.frag;
 
-import com.samcymbaluk.ultimateguns.features.FeatureConfig;
 import org.bukkit.Material;
 
-public class FragFeatureConfig extends FeatureConfig {
+public class FragFeatureConfig {
 
     private int fuse = 80;
     private int throwVelocity = 25;

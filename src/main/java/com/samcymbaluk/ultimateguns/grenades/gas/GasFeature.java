@@ -1,34 +1,37 @@
 package com.samcymbaluk.ultimateguns.grenades.gas;
 
-import com.samcymbaluk.ultimateguns.config.UltimateGunsConfig;
-import com.samcymbaluk.ultimateguns.features.FeatureConfig;
 import com.samcymbaluk.ultimateguns.features.PluginFeature;
 
-public class GasFeature extends PluginFeature {
+public class GasFeature extends PluginFeature<GasFeatureConfig> {
 
     private final String name = "gas";
 
-    private UltimateGunsConfig config;
+    private GasFeatureConfig config;
 
     private GasManager gasManager;
     private GasListener gasListener;
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
-    public FeatureConfig getDefaultConfig() {
-        return new FeatureConfig();
+    public Class<GasFeatureConfig> configClass() {
+        return GasFeatureConfig.class;
     }
 
-    @Override
-    public void enable(UltimateGunsConfig config) {
+    public GasFeatureConfig defaultConfig() {
+        return new GasFeatureConfig();
+    }
+
+    public void enable(GasFeatureConfig config) {
         this.config = config;
         this.gasManager = new GasManager(this);
         this.gasManager.start();
 
         this.gasListener = new GasListener(this, this.gasManager);
+    }
+
+    public GasFeatureConfig getConfig() {
+        return this.config;
     }
 }
