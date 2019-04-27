@@ -19,7 +19,7 @@ public class GasFeature extends PluginFeature {
     }
 
     @Override
-    public FeatureConfig getConfig() {
+    public FeatureConfig getDefaultConfig() {
         return new FeatureConfig();
     }
 

@@ -13,7 +13,7 @@ public abstract class PluginFeature {
 
     public abstract String getName();
 
-    public abstract FeatureConfig getConfig();
+    public abstract FeatureConfig getDefaultConfig();
 
     public abstract void enable(UltimateGunsConfig config);
 

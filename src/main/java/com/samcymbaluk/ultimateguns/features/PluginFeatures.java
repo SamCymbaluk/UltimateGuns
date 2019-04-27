@@ -1,6 +1,7 @@
 package com.samcymbaluk.ultimateguns.features;
 
 import com.samcymbaluk.ultimateguns.config.UltimateGunsConfig;
+import com.samcymbaluk.ultimateguns.config.UltimateGunsConfigLoader;
 import com.samcymbaluk.ultimateguns.grenades.frag.FragFeature;
 import com.samcymbaluk.ultimateguns.grenades.gas.GasFeature;
 
@@ -14,7 +15,6 @@ public class PluginFeatures {
     private Map<String, PluginFeature> features;
 
     private PluginFeatures() {
-        setupFeatures();
     }
 
     public synchronized static PluginFeatures getInstance() {
@@ -27,14 +27,16 @@ public class PluginFeatures {
     /**
      * TODO
      */
-    public void setupFeatures() {
+    public void setupFeatures(UltimateGunsConfigLoader configLoader) {
         features = new HashMap<>();
 
-        FragFeature fragFeature = new FragFeature();
-        features.put(fragFeature.getName(), fragFeature);
+        setupFeature(new FragFeature(), configLoader);
+        setupFeature(new GasFeature(), configLoader);
+    }
 
-        GasFeature gasFeature = new GasFeature();
-        features.put(gasFeature.getName(), gasFeature);
+    private void setupFeature(PluginFeature feature, UltimateGunsConfigLoader configLoader) {
+        features.put(feature.getName(), feature);
+        configLoader.registerFeatureConfig(feature.getDefaultConfig());
     }
 
     public  Map<String, PluginFeature> getFeatures() {

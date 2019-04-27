@@ -64,6 +64,7 @@ public class GasManager {
                 playerEffects.put(player, effectTime);
 
                 player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 3, true, false), true);
+                // TODO fix!
                 player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * effectTime, 2, true, false), true);
             } else {
                 playerEffects.remove(player);

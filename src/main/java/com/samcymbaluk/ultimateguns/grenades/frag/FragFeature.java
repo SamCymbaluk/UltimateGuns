@@ -16,12 +16,16 @@ public class FragFeature extends PluginFeature {
         return name;
     }
 
-    public FeatureConfig getConfig() {
-        return new FeatureConfig();
+    public FeatureConfig getDefaultConfig() {
+        return new FragFeatureConfig();
     }
 
     public void enable(UltimateGunsConfig config) {
         this.config = config;
         fragListener = new FragListener(this);
+    }
+
+    public FragFeatureConfig getConfig() {
+        return (FragFeatureConfig) this.config.getFeatureConfig(name);
     }
 }

@@ -37,7 +37,7 @@ public class FragListener implements Listener {
             // TODO make configurable
             if (item.getType() == Material.COAL) {
                 event.setCancelled(true);
-                FragGrenade frag = new FragGrenade(player);
+                FragGrenade frag = new FragGrenade(fragFeature, player);
                 frag.throwGrenade();
             }
 

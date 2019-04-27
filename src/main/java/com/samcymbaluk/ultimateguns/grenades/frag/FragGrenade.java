@@ -20,8 +20,11 @@ import java.util.Set;
 
 public class FragGrenade extends Grenade {
 
-    public FragGrenade(Player thrower) {
-        super(thrower, 25, Material.COAL_BLOCK);
+    FragFeature fragFeature;
+
+    public FragGrenade(FragFeature fragFeature, Player thrower) {
+        super(thrower, fragFeature.getConfig().getThrowVelocity(), fragFeature.getConfig().getEntityMaterial());
+        this.fragFeature = fragFeature;
     }
 
     @Override
@@ -31,7 +34,7 @@ public class FragGrenade extends Grenade {
 
     @Override
     public void onTick(Location loc, int tick) {
-        if (tick >= 80) { //Explode
+        if (tick >= fragFeature.getConfig().getFuse()) { //Explode
             explodeEffect(loc.getBlock().getLocation().add(0.5, 0.5, 0.5));
             explode(loc);
             getProjectile().end();

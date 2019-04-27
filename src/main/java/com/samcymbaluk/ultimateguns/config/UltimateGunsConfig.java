@@ -13,15 +13,18 @@ public class UltimateGunsConfig {
 
     private String prefix = GRAY + "" + BOLD + "[" + YELLOW + "" + BOLD + "UltimateGuns" + GRAY + "" + BOLD + "] ";
 
-    private Map<String, FeatureConfig> features = new LinkedHashMap<>();
+    private Map<String, Object> features;
 
     public UltimateGunsConfig() {
-        for (Map.Entry<String, PluginFeature> entry : PluginFeatures.getInstance().getFeatures().entrySet()) {
-            features.put(entry.getKey(), entry.getValue().getConfig());
-        }
-    }
+        features = new LinkedHashMap<>();
 
+        for (Map.Entry<String, PluginFeature> entry : PluginFeatures.getInstance().getFeatures().entrySet()) {
+            features.put(entry.getKey(), entry.getValue().getDefaultConfig());
+        }
+        PluginFeatures.getInstance().enableFeatures(this);
+    }
+    
     public FeatureConfig getFeatureConfig(String feature) {
-        return features.get(feature);
+        return (FeatureConfig) features.get(feature);
     }
 }
