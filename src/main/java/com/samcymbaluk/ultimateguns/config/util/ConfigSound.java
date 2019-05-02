@@ -92,11 +92,12 @@ public class ConfigSound {
     public void play(Location loc, Player target) {
         List<Player> listeners = targetOnly ? Collections.singletonList(target)
                                             : loc.getWorld().getPlayers();
+
         for (Player listener : listeners) {
             if (realistic) {
-                playRealisticSound(loc, target);
+                playRealisticSound(loc, listener);
             } else {
-                playSound(loc, target);
+                playSound(loc, listener);
             }
         }
     }

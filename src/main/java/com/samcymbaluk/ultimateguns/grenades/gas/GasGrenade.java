@@ -12,14 +12,16 @@ import org.bukkit.util.Vector;
 public class GasGrenade extends Grenade {
 
     private GasManager gm;
+    private GasFeature gasFeature;
 
     private int TASK_ID;
     private int tick = 0;
     private boolean exploded = false;
 
-    public GasGrenade(GasManager gasManager, Player thrower) {
-        super(thrower, 25, Material.IRON_BLOCK);
+    public GasGrenade(GasManager gasManager, GasFeature gasFeature, Player thrower) {
+        super(thrower, 25, Material.IRON_BLOCK, gasFeature.getConfig());
         this.gm = gasManager;
+        this.gasFeature = gasFeature;
     }
 
     @Override

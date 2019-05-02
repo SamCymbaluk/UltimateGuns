@@ -8,9 +8,6 @@ import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
@@ -25,7 +22,7 @@ public class FragGrenade extends Grenade {
     FragFeature fragFeature;
 
     public FragGrenade(FragFeature fragFeature, Player thrower) {
-        super(thrower, fragFeature.getConfig().getThrowVelocity(), fragFeature.getConfig().getEntityMaterial());
+        super(thrower, fragFeature.getConfig().getThrowVelocity(), fragFeature.getConfig().getEntityMaterial(), fragFeature.getConfig());
         this.fragFeature = fragFeature;
     }
 

@@ -1,6 +1,7 @@
 package com.samcymbaluk.ultimateguns.grenades;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
+import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
@@ -34,17 +35,19 @@ public class GrenadeProjectile {
     private Entity ent;
     private Location loc;
     private Grenade grenade;
+    private GrenadeFeatureConfig config;
 
     private int tick = 0;
     private EntityArmorStand stand;
 
     private boolean ended = false;
 
-    public GrenadeProjectile(Entity ent, Location loc, Grenade grenade, Material material) {
+    public GrenadeProjectile(Entity ent, Location loc, Grenade grenade, Material material, GrenadeFeatureConfig config) {
         this.material = material;
         this.ent = ent;
         this.loc = loc.clone();
         this.grenade = grenade;
+        this.config = config;
     }
 
     public void start(Location start, double velocity) {
@@ -92,7 +95,8 @@ public class GrenadeProjectile {
             if (!grenade.onImpact(path.clone(), newStart.clone())) {
                 impactCalculations(path, rtResult);
                 if (path.length() > 0.1) {
-                    start.getWorld().playSound(newStart, Sound.BLOCK_ANVIL_PLACE, 1, 1);
+                    System.out.println("TEST");
+                    config.getImpactSound().play(newStart);
                 }
             } else { //Remove grenade
                 for (Player p : ent.getWorld().getPlayers()) {
@@ -106,13 +110,13 @@ public class GrenadeProjectile {
         //Apply water drag
         if (newStart.getBlock().isLiquid()) {
             if (path.length() > 0.1) {
-                path.multiply(0.5);
+                path.multiply(config.getLiquidMultiplier());
             }
         }
 
         //Gravity
         if (!newStart.clone().add(0.0, -0.01, 0.0).getBlock().getType().isSolid()) {
-            path.add(new Vector(0,  -0.045, 0));
+            path.add(new Vector(0,  -config.getGravity(), 0));
         }
 
         if (!ended) {

@@ -1,4 +1,6 @@
 package com.samcymbaluk.ultimateguns.grenades.gas;
 
-public class GasFeatureConfig {
+import com.samcymbaluk.ultimateguns.grenades.GrenadeFeatureConfig;
+
+public class GasFeatureConfig extends GrenadeFeatureConfig {
 }

@@ -2,6 +2,7 @@ package com.samcymbaluk.ultimateguns.grenades.frag;
 
 import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
 import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
+import com.samcymbaluk.ultimateguns.grenades.GrenadeFeatureConfig;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class FragFeatureConfig {
+public class FragFeatureConfig extends GrenadeFeatureConfig {
 
     private int fuse = 80;
     private int throwVelocity = 25;

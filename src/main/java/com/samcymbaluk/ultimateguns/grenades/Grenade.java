@@ -13,11 +13,13 @@ public abstract class Grenade {
 
     private double startVelocity;
     private Material material;
+    private GrenadeFeatureConfig config;
 
-    public Grenade(Player thrower, double startVelocity, Material material) {
+    public Grenade(Player thrower, double startVelocity, Material material, GrenadeFeatureConfig config) {
         this.thrower = thrower;
         this.startVelocity = startVelocity;
         this.material = material;
+        this.config = config;
     }
 
     public Player getThrower() {
@@ -29,7 +31,7 @@ public abstract class Grenade {
     }
 
     public void throwGrenade() {
-        projectile = new GrenadeProjectile(thrower, thrower.getEyeLocation(), this, material);
+        projectile = new GrenadeProjectile(thrower, thrower.getEyeLocation(), this, material, config);
         projectile.start(thrower.getEyeLocation(), startVelocity);
 
 

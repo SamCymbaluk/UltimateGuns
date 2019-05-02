@@ -31,7 +31,7 @@ public class GasListener implements Listener {
             // TODO make configurable
             if (item.getType() == Material.IRON_INGOT) {
                 event.setCancelled(true);
-                GasGrenade gas = new GasGrenade(gasManager, player);
+                GasGrenade gas = new GasGrenade(gasManager, gasFeature, player);
                 gas.throwGrenade();
             }
         }
