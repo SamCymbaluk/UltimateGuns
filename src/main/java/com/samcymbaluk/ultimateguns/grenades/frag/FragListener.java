@@ -31,11 +31,10 @@ public class FragListener implements Listener {
         Player player = event.getPlayer();
         if (!fragFeature.isEnabled(player.getWorld())) return;
 
-        if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
             ItemStack item = player.getInventory().getItemInMainHand();
 
-            // TODO make configurable
-            if (item.getType() == Material.COAL) {
+            if (item.getType() == fragFeature.getConfig().getItemMaterial()) {
                 event.setCancelled(true);
                 FragGrenade frag = new FragGrenade(fragFeature, player);
                 frag.throwGrenade();
@@ -43,6 +42,7 @@ public class FragListener implements Listener {
 
             // TODO remove debug
             if (item.getType() == Material.GOLD_INGOT) {
+                event.setCancelled(true);
                 UltimateGunsProjectile proj = new UltimateGunsProjectile(player, true, 715./20., 0.25, 255);
                 proj.start(player.getEyeLocation(), player.getEyeLocation().getDirection(), new ProjectileCallback() {
                     double penLeft = 30;
@@ -53,7 +53,7 @@ public class FragListener implements Listener {
                             target.onHit(event.getPlayer(), 100);
                         } else if (target instanceof BlockTarget) {
                             if (!((BlockTarget) target).getBlock().isPassable()) {
-                                double penLost = 2;
+                                double penLost = 15;
                                 penLeft -= penLost;
                                 if (penLeft <= 0) proj.kill();
                                 path.multiply(((float) (30 - penLost)) / ((float) 30));

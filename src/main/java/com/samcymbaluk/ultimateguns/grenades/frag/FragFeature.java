@@ -19,6 +19,7 @@ public class FragFeature extends PluginFeature<FragFeatureConfig> {
     }
 
     public FragFeatureConfig defaultConfig() {
+        System.out.println(new FragFeatureConfig().getExplosionSounds());
         return new FragFeatureConfig();
     }
 
