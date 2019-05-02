@@ -1,6 +1,7 @@
 package com.samcymbaluk.ultimateguns.grenades.frag;
 
 import com.samcymbaluk.ultimateguns.UltimateGunsProjectile;
+import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
 import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
 import com.samcymbaluk.ultimateguns.grenades.Grenade;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
@@ -149,9 +150,7 @@ public class FragGrenade extends Grenade {
     }
 
     private void explodeEffect(Location loc) {
-        loc.getWorld().spawnParticle(Particle.EXPLOSION_HUGE, loc, 1, 0, 0, 0, 0.1, null, true);
-        loc.getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, loc, 300, 0.5, 0.5, 0.5, 0.5, null, true);
-        loc.getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, loc, 100, 0.5, 0.5, 0.5, 1.0, null, true);
+        ConfigParticle.spawnAll(fragFeature.getConfig().getExplosionParticles(), loc);
         ConfigSound.playAll(fragFeature.getConfig().getExplosionSounds(), loc, getThrower());
     }
 }

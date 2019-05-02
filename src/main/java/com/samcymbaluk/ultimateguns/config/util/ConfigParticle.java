@@ -1,8 +1,15 @@
 package com.samcymbaluk.ultimateguns.config.util;
 
+import org.bukkit.Location;
 import org.bukkit.Particle;
 
 public class ConfigParticle {
+
+    public static void spawnAll(Iterable<ConfigParticle> particles, Location loc) {
+        for (ConfigParticle particle : particles) {
+            particle.spawn(loc);
+        }
+    }
 
     private Particle particle;
     private int count;
@@ -54,5 +61,9 @@ public class ConfigParticle {
 
     public boolean getForceDisplay() {
         return forceDisplay;
+    }
+
+    public void spawn(Location loc) {
+        loc.getWorld().spawnParticle(particle, loc, count, rx, ry, rz, extra, data, forceDisplay);
     }
 }
