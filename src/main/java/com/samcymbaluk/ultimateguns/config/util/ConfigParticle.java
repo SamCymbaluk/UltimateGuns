@@ -1,9 +1,10 @@
 package com.samcymbaluk.ultimateguns.config.util;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 
-public class ConfigParticle {
+public class ConfigParticle implements PostProcessable {
 
     public static void spawnAll(Iterable<ConfigParticle> particles, Location loc) {
         for (ConfigParticle particle : particles) {
@@ -19,6 +20,11 @@ public class ConfigParticle {
     private double extra;
     private Object data;
     private boolean forceDisplay;
+
+    @Override
+    public void gsonPostProcess() {
+        Validate.notNull(particle, "Invalid particle name");
+    }
 
     public ConfigParticle(Particle particle, int count, double rx, double ry, double rz, double extra, Object data, boolean forceDisplay) {
         this.particle = particle;

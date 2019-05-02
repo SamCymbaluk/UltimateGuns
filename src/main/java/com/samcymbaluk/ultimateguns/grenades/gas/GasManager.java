@@ -1,6 +1,7 @@
 package com.samcymbaluk.ultimateguns.grenades.gas;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
+import com.samcymbaluk.ultimateguns.config.util.ConfigPotionEffect;
 import com.samcymbaluk.ultimateguns.util.ImmutableBlockVector;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -8,8 +9,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,12 +16,14 @@ import java.util.Map;
 public class GasManager {
 
     private GasFeature gasFeature;
+    private GasFeatureConfig conf;
 
     private Map<ImmutableBlockVector, GasBlock> gasBlocks;
     private int tick;
 
     public GasManager(GasFeature gasFeature) {
         this.gasFeature = gasFeature;
+        this.conf = gasFeature.getConfig();
         gasBlocks = new HashMap<>();
     }
 
@@ -47,19 +48,24 @@ public class GasManager {
     }
 
     private void effectsTick(int tick) {
-        if (tick % 5 == 0) {
+        if (tick % conf.getEffectPollPeriod() == 0) {
             playerEffectsTick();
-            entityEffectsTick();
+            if (conf.isAffectMobs()) {
+                entityEffectsTick();
+            }
         }
     }
 
     private void playerEffectsTick() {
         for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!gasFeature.isEnabled(player.getWorld())) continue;
+
             GasBlock gp = getGasBlock(player.getEyeLocation().getBlock());
             //We only care if the player's face is in gas not the rest of their body
             if (gp != null) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 3, true, false), true);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100, 2, true, false), true);
+                for (ConfigPotionEffect effect : conf.getEffects()) {
+                    effect.add(player, true);
+                }
             }
         }
     }
@@ -69,13 +75,15 @@ public class GasManager {
             if (!gasFeature.isEnabled(world)) continue;
 
             for (Entity entity : world.getEntities()) {
-                if (!(entity instanceof LivingEntity) || (entity instanceof Player)) continue;
+                if (!(entity instanceof LivingEntity) || (entity instanceof Player) || (conf.getIgnoredEntities().contains(entity.getType()))) continue;
 
                 LivingEntity livingEnt = (LivingEntity) entity;
                 GasBlock gp = getGasBlock(livingEnt.getEyeLocation().getBlock());
 
                 if (gp != null) {
-                    livingEnt.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100, 2, true, false), true);
+                    for (ConfigPotionEffect effect : conf.getEffects()) {
+                        effect.add(livingEnt, true);
+                    }
                 }
             }
         }
@@ -118,5 +126,9 @@ public class GasManager {
         //Add
         ImmutableBlockVector newKey = new ImmutableBlockVector(gb.getBlock());
         gasBlocks.put(newKey, gb);
+    }
+
+    public GasFeatureConfig getConfig() {
+        return conf;
     }
 }

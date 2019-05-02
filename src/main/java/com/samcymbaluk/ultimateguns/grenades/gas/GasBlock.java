@@ -1,10 +1,8 @@
 package com.samcymbaluk.ultimateguns.grenades.gas;
 
-import com.google.common.collect.Lists;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.RayTraceResult;
@@ -19,6 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class GasBlock {
 
     private GasManager gm;
+    private GasFeatureConfig conf;
 
     private Block block;
     private int density;
@@ -29,6 +28,7 @@ public class GasBlock {
      */
     public GasBlock(GasManager gasManager, Block block, int density) {
         this.gm = gasManager;
+        this.conf = gasManager.getConfig();
         this.block = block;
         this.density = density;
         gm.addGasBlock(this);
@@ -36,30 +36,29 @@ public class GasBlock {
     }
 
     public void doPhysics(int tick) {
-        //Effect with quantity directly proportional to density
         doEffect(tick);
-
         doSpreading(tick);
         doGravity(tick);
     }
 
     private void doEffect(int tick) {
-
         Location pLoc = block.getLocation().add(0.5, 0.5, 0.5);
-        int baseEffect = random.nextInt(5) == 0 ? 1 : 0;
+        double particlesLeft = conf.getParticleFrequency() + conf.getParticleFrequency() * (density * conf.getParticleDensityMultiplier());
+        particlesLeft = Math.min(particlesLeft, conf.getMaxParticleAmount());
 
-        // Density scaling
-        for (int i = 0; i < (density / 4) + baseEffect; i++) {
-            if (i > 50) break;
-            block.getWorld().spawnParticle(Particle.SPELL_MOB,
-                    pLoc.getX() + random.nextDouble(-0.5, 0.5),
-                    pLoc.getY() + random.nextDouble(-0.5, 0.5),
-                    pLoc.getZ() + random.nextDouble(-0.5, 0.5),
-                    0,
-                    19.0 / 255.0,
-                    219.0 / 255.0,
-                    73.0 / 255.0,
-                    1);
+        while (particlesLeft > 0) {
+            boolean spawn = particlesLeft > 1 || random.nextDouble() <= particlesLeft;
+
+            if (spawn) {
+                Location ranLoc = new Location(block.getWorld(),
+                        pLoc.getX() + random.nextDouble(-0.5, 0.5),
+                        pLoc.getY() + random.nextDouble(-0.5, 0.5),
+                        pLoc.getZ() + random.nextDouble(-0.5, 0.5));
+
+                conf.getGasParticle().spawn(ranLoc);
+            }
+
+            particlesLeft--;
         }
     }
 
@@ -70,8 +69,10 @@ public class GasBlock {
             Block spreadBlock = getSpreadBlocks().get(0);
 
             //Put out fire
-            if (spreadBlock.getType() == Material.FIRE && spreadBlock.getRelative(BlockFace.DOWN).getType() != Material.NETHERRACK) {
-                spreadBlock.setType(Material.AIR);
+            if (conf.isExtinguishFire() && spreadBlock.getType() == Material.FIRE) {
+                if (spreadBlock.getRelative(BlockFace.DOWN).getType() != Material.NETHERRACK) {
+                    spreadBlock.setType(Material.AIR);
+                }
             }
 
             setDensity(density / 2);
@@ -82,15 +83,17 @@ public class GasBlock {
                 new GasBlock(gm, spreadBlock, density);
             }
         } else {
-            if (tick % 20 == 0 && random.nextInt(10) == 0) {
+            if (tick % conf.getDissipationPollPeriod() == 0 && random.nextDouble() <= conf.getDissipationChance()) {
                 gm.removeGasBlock(this);
             }
         }
     }
 
     private void doGravity(int tick) {
+        if (!conf.hasGasGravity()) return;
+
         // Dense gas falls quicker
-        if (random.nextInt((100 / (density + 1)) + 1) != 0) return;
+        if (random.nextInt((conf.getGasGravityPeriod() / (density + 1)) + 1) != 0) return;
 
         if (gm.getGasBlock(block.getRelative(BlockFace.DOWN)) == null && block.getRelative(BlockFace.DOWN).isEmpty()) {
             //block.setType(Material.AIR);

@@ -20,10 +20,12 @@ import java.util.Set;
 public class FragGrenade extends Grenade {
 
     FragFeature fragFeature;
+    FragFeatureConfig conf;
 
     public FragGrenade(FragFeature fragFeature, Player thrower) {
         super(thrower, fragFeature.getConfig().getThrowVelocity(), fragFeature.getConfig().getEntityMaterial(), fragFeature.getConfig());
         this.fragFeature = fragFeature;
+        this.conf = fragFeature.getConfig();
     }
 
     @Override
@@ -33,7 +35,7 @@ public class FragGrenade extends Grenade {
 
     @Override
     public void onTick(Location loc, int tick) {
-        if (tick >= fragFeature.getConfig().getFuse()) { //Explode
+        if (tick >= conf.getFuse()) { //Explode
             explodeEffect(loc.getBlock().getLocation().add(0.5, 0.5, 0.5));
             explode(loc);
             getProjectile().end();
@@ -45,7 +47,7 @@ public class FragGrenade extends Grenade {
         Set<Target> hitTargets = new HashSet<>();
         Vector start = center.toVector();
 
-        double radius = fragFeature.getConfig().getExplosionRadius();
+        double radius = conf.getExplosionRadius();
         List<Vector> vectors = getExplosionVectors(start.clone(), radius, radius, radius, false);
         for (Vector vector : vectors) {
             UltimateGunsProjectile proj = new UltimateGunsProjectile(getThrower(), true, 50, 0, radius + 5);
@@ -54,8 +56,8 @@ public class FragGrenade extends Grenade {
                 public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
                     if (!hitTargets.contains(target)) {
                         target.onHit(getThrower(),
-                                fragFeature.getConfig().getInitialDamage()
-                                - (fragFeature.getConfig().getDamageDropoff() * center.distance(target.getLocation())));
+                                conf.getInitialDamage()
+                                - (conf.getDamageDropoff() * center.distance(target.getLocation())));
                         hitTargets.add(target);
                     }
                     if (target instanceof BlockTarget) {
@@ -147,7 +149,7 @@ public class FragGrenade extends Grenade {
     }
 
     private void explodeEffect(Location loc) {
-        ConfigParticle.spawnAll(fragFeature.getConfig().getExplosionParticles(), loc);
-        ConfigSound.playAll(fragFeature.getConfig().getExplosionSounds(), loc, getThrower());
+        ConfigParticle.spawnAll(conf.getExplosionParticles(), loc);
+        ConfigSound.playAll(conf.getExplosionSounds(), loc, getThrower());
     }
 }

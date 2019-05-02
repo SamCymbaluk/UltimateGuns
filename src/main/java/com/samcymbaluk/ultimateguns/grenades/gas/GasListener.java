@@ -25,11 +25,10 @@ public class GasListener implements Listener {
         Player player = event.getPlayer();
         if (!gasFeature.isEnabled(player.getWorld())) return;
 
-        if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
             ItemStack item = player.getInventory().getItemInMainHand();
 
-            // TODO make configurable
-            if (item.getType() == Material.IRON_INGOT) {
+            if (item.getType() == gasFeature.getConfig().getItemMaterial()) {
                 event.setCancelled(true);
                 GasGrenade gas = new GasGrenade(gasManager, gasFeature, player);
                 gas.throwGrenade();

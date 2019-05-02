@@ -29,6 +29,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
+import com.samcymbaluk.ultimateguns.config.util.PostProcessingEnabler;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +47,7 @@ public class ConfigLoader {
     private static Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .registerTypeAdapterFactory(new PostProcessingEnabler())
             .create();
 
     /**
