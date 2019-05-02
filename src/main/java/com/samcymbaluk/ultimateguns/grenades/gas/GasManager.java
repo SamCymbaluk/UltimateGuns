@@ -13,14 +13,12 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 public class GasManager {
 
     private GasFeature gasFeature;
 
     private Map<ImmutableBlockVector, GasBlock> gasBlocks;
-    private Map<Player, Integer> playerEffects = new WeakHashMap<>();
     private int tick;
 
     public GasManager(GasFeature gasFeature) {
@@ -60,14 +58,8 @@ public class GasManager {
             GasBlock gp = getGasBlock(player.getEyeLocation().getBlock());
             //We only care if the player's face is in gas not the rest of their body
             if (gp != null) {
-                int effectTime = playerEffects.containsKey(player) ? playerEffects.get(player) + 1 : 1;
-                playerEffects.put(player, effectTime);
-
                 player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 3, true, false), true);
-                // TODO fix!
-                player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * effectTime, 2, true, false), true);
-            } else {
-                playerEffects.remove(player);
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100, 2, true, false), true);
             }
         }
     }

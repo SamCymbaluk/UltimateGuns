@@ -95,7 +95,6 @@ public class GrenadeProjectile {
             if (!grenade.onImpact(path.clone(), newStart.clone())) {
                 impactCalculations(path, rtResult);
                 if (path.length() > 0.1) {
-                    System.out.println("TEST");
                     config.getImpactSound().play(newStart);
                 }
             } else { //Remove grenade
