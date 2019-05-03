@@ -1,9 +1,10 @@
 package com.samcymbaluk.ultimateguns.grenades;
 
 import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
+import com.samcymbaluk.ultimateguns.features.PluginFeatureConfig;
 import org.bukkit.Sound;
 
-public class GrenadeFeatureConfig {
+public class GrenadeFeatureConfig extends PluginFeatureConfig {
 
     private ConfigSound impactSound = new ConfigSound(Sound.BLOCK_ANVIL_PLACE, 1, 1);
 

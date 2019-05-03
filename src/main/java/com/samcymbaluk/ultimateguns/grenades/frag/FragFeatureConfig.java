@@ -7,7 +7,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

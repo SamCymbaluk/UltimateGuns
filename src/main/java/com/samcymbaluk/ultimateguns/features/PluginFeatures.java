@@ -74,10 +74,6 @@ public class PluginFeatures {
                 UltimateGuns.getInstance().getLogger().severe(String.format("Unable to load config for \"%s\" feature", name));
                 UltimateGuns.getInstance().getLogger().severe("Ensure the feature configuration is properly formatted");
             }
-
-            // TODO
-            feature.enableInWorlds(Arrays.asList("*"));
-
         }
     }
 }
