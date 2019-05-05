@@ -1,9 +1,10 @@
-package com.samcymbaluk.ultimateguns.grenades.frag;
+package com.samcymbaluk.ultimateguns.features.grenades.frag;
 
+import com.samcymbaluk.ultimateguns.UltimateGuns;
 import com.samcymbaluk.ultimateguns.UltimateGunsProjectile;
 import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
 import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
-import com.samcymbaluk.ultimateguns.grenades.Grenade;
+import com.samcymbaluk.ultimateguns.features.grenades.Grenade;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;

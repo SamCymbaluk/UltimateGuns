@@ -1,4 +1,4 @@
-package com.samcymbaluk.ultimateguns.grenades;
+package com.samcymbaluk.ultimateguns.features.grenades;
 
 import org.bukkit.Location;
 import org.bukkit.Material;

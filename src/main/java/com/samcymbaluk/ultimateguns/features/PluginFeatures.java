@@ -1,15 +1,13 @@
 package com.samcymbaluk.ultimateguns.features;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
-import com.samcymbaluk.ultimateguns.config.UltimateGunsConfig;
 import com.samcymbaluk.ultimateguns.config.ConfigLoader;
-import com.samcymbaluk.ultimateguns.grenades.frag.FragFeature;
-import com.samcymbaluk.ultimateguns.grenades.gas.GasFeature;
+import com.samcymbaluk.ultimateguns.features.grenades.frag.FragFeature;
+import com.samcymbaluk.ultimateguns.features.grenades.gas.GasFeature;
+import com.samcymbaluk.ultimateguns.features.guns.GunFeature;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +37,7 @@ public class PluginFeatures {
 
         setupFeature(new FragFeature());
         setupFeature(new GasFeature());
+        setupFeature(new GunFeature());
     }
 
     private void setupFeature(PluginFeature feature) {

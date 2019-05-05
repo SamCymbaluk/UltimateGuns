@@ -1,16 +1,15 @@
-package com.samcymbaluk.ultimateguns.grenades.gas;
+package com.samcymbaluk.ultimateguns.features.grenades.gas;
 
 import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
 import com.samcymbaluk.ultimateguns.config.util.ConfigPotionEffect;
 import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
 import com.samcymbaluk.ultimateguns.config.util.PostProcessable;
-import com.samcymbaluk.ultimateguns.grenades.GrenadeFeatureConfig;
+import com.samcymbaluk.ultimateguns.features.grenades.GrenadeFeatureConfig;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Arrays;

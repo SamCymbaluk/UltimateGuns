@@ -1,4 +1,4 @@
-package com.samcymbaluk.ultimateguns.grenades.gas;
+package com.samcymbaluk.ultimateguns.features.grenades.gas;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
 import com.samcymbaluk.ultimateguns.config.util.ConfigPotionEffect;

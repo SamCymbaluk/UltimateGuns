@@ -2,6 +2,7 @@ package com.samcymbaluk.ultimateguns;
 
 import com.samcymbaluk.ultimateguns.config.ConfigLoader;
 import com.samcymbaluk.ultimateguns.config.UltimateGunsConfig;
+import com.samcymbaluk.ultimateguns.environment.EnvironmentConfig;
 import com.samcymbaluk.ultimateguns.features.PluginFeature;
 import com.samcymbaluk.ultimateguns.features.PluginFeatures;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,6 +15,8 @@ public class UltimateGuns extends JavaPlugin {
     private static UltimateGuns instance;
     private UltimateGunsConfig config;
 
+    private EnvironmentConfig environmentConfig;
+
     public static UltimateGuns getInstance() {
         return instance;
     }
@@ -22,16 +25,28 @@ public class UltimateGuns extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        File dataFolder = this.getDataFolder();
+        dataFolder.mkdir();
+
+        loadEnvironmentConfig();
         loadFeatures();
+    }
+
+    private void loadEnvironmentConfig() {
+        try {
+            File environmentConfigFile = new File(this.getDataFolder().getPath() + File.separator + "environment.json");
+            environmentConfig = ConfigLoader.loadConfig(EnvironmentConfig.class, environmentConfigFile, new EnvironmentConfig());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            this.getLogger().severe("Error loading environment config. Falling back to defaults");
+            environmentConfig = new EnvironmentConfig();
+        }
     }
 
     private void loadFeatures() {
         PluginFeatures.getInstance().setupFeatures();
 
         try {
-            File dataFolder = this.getDataFolder();
-            dataFolder.mkdir();
-
             File configFile = new File(this.getDataFolder().getPath() + File.separator + "config.json");
             config = ConfigLoader.loadConfig(UltimateGunsConfig.class, configFile, new UltimateGunsConfig());
         } catch (IOException ex) {
@@ -41,6 +56,10 @@ public class UltimateGuns extends JavaPlugin {
         }
 
         PluginFeatures.getInstance().enableFeatures();
+    }
+
+    public EnvironmentConfig getEnvironmentConfig() {
+        return environmentConfig;
     }
 
     @Override

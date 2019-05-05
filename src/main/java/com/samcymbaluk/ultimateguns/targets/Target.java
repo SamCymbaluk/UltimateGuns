@@ -149,7 +149,7 @@ public abstract class Target {
     /**
      * @return The penetration cost
      */
-    public abstract int getPenetrationCost();
+    public abstract double getPenetrationCost();
 
     /**
      * @return The collision restitution

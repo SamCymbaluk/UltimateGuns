@@ -1,7 +1,6 @@
-package com.samcymbaluk.ultimateguns.grenades;
+package com.samcymbaluk.ultimateguns.features.grenades;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
-import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
@@ -16,7 +15,6 @@ import net.minecraft.server.v1_13_R2.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;

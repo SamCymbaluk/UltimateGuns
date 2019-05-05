@@ -118,9 +118,7 @@ public class UltimateGunsProjectile {
         for (double i = 0; i < path.length(); i += 2.5) {
 
             Vector pos = start.clone().add(path.clone().normalize().multiply(i));
-            for (Player p : loc.getWorld().getPlayers()) {
-                loc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, pos.toLocation(p.getWorld()), 1, 0, 0, 0, 0, null, true);
-            }
+            loc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, pos.toLocation(loc.getWorld()), 1, 0, 0, 0, 0, null, true);
 
         }
     }

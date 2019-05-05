@@ -1,4 +1,4 @@
-package com.samcymbaluk.ultimateguns.grenades;
+package com.samcymbaluk.ultimateguns.features.grenades;
 
 import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
 import com.samcymbaluk.ultimateguns.features.PluginFeatureConfig;

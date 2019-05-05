@@ -1,8 +1,8 @@
-package com.samcymbaluk.ultimateguns.grenades.gas;
+package com.samcymbaluk.ultimateguns.features.grenades.gas;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
 import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
-import com.samcymbaluk.ultimateguns.grenades.Grenade;
+import com.samcymbaluk.ultimateguns.features.grenades.Grenade;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

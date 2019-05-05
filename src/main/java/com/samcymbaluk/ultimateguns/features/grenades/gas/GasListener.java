@@ -1,7 +1,6 @@
-package com.samcymbaluk.ultimateguns.grenades.gas;
+package com.samcymbaluk.ultimateguns.features.grenades.gas;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

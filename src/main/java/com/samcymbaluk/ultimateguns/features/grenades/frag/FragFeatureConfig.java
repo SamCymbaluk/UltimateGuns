@@ -1,8 +1,8 @@
-package com.samcymbaluk.ultimateguns.grenades.frag;
+package com.samcymbaluk.ultimateguns.features.grenades.frag;
 
 import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
 import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
-import com.samcymbaluk.ultimateguns.grenades.GrenadeFeatureConfig;
+import com.samcymbaluk.ultimateguns.features.grenades.GrenadeFeatureConfig;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;

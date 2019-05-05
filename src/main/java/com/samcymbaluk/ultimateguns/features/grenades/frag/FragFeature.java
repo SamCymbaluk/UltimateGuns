@@ -1,4 +1,4 @@
-package com.samcymbaluk.ultimateguns.grenades.frag;
+package com.samcymbaluk.ultimateguns.features.grenades.frag;
 
 import com.samcymbaluk.ultimateguns.features.PluginFeature;
 

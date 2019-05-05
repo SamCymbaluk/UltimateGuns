@@ -1,5 +1,6 @@
 package com.samcymbaluk.ultimateguns.targets;
 
+import com.samcymbaluk.ultimateguns.UltimateGuns;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -22,68 +23,17 @@ public class BlockTarget extends Target {
 
     @Override
     public RayTraceResult isHit(Location start, Vector direction, double maxDistance) {
-        return block.rayTrace(start, direction, maxDistance, FluidCollisionMode.NEVER);
+        return block.rayTrace(start, direction, maxDistance, FluidCollisionMode.ALWAYS);
     }
 
     @Override
-    public int getPenetrationCost() {
-        switch (block.getType()) {
-            /*
-            case LOG:
-                return 25;
-            case WATER:
-            case STATIONARY_WATER:
-                return 10;
-            case LEAVES:
-                return 1;
-            case GLASS:
-            case STAINED_GLASS:
-            case STAINED_GLASS_PANE:
-            case THIN_GLASS:
-                return 1;
-            case WOODEN_DOOR:
-                return 15;
-            case WOOD:
-                return 20;
-            case FENCE:
-            case JUNGLE_FENCE:
-                return 10;
-            case SANDSTONE:
-            case SANDSTONE_STAIRS:
-                return 30;
-            case STONE:
-                return 45;
-            case COBBLESTONE:
-            case COBBLESTONE_STAIRS:
-            case MOSSY_COBBLESTONE:
-            case SMOOTH_BRICK:
-            case SMOOTH_STAIRS:
-                return 45;
-            case QUARTZ_STAIRS:
-                return 5;
-            case ACACIA_STAIRS:
-                return 10;
-            case NETHER_BRICK:
-            case NETHER_BRICK_STAIRS:
-                return 30;
-            case QUARTZ_BLOCK:
-                return 40;
-            case STAINED_CLAY:
-                return 30;
-            case DIAMOND_ORE:
-            case BRICK:
-                return 75;
-            case WOOL:
-                return 20;
-                */
-            default:
-                return -1;
-        }
+    public double getPenetrationCost() {
+        return UltimateGuns.getInstance().getEnvironmentConfig().getPenetrationCost(block.getType());
     }
 
     @Override
     public double getRestitution() {
-        return 0.4;
+        return UltimateGuns.getInstance().getEnvironmentConfig().getRestitution(block.getType());
     }
 
     @Override
@@ -93,6 +43,14 @@ public class BlockTarget extends Target {
 
     public Block getBlock() {
         return block;
+    }
+
+    public boolean isDestructible() {
+        return UltimateGuns.getInstance().getEnvironmentConfig().isDestructible(block.getType());
+    }
+
+    public double destructionThreshold() {
+        return UltimateGuns.getInstance().getEnvironmentConfig().getDestructionThreshold(block.getType());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.samcymbaluk.ultimateguns.targets;
 
+import com.samcymbaluk.ultimateguns.UltimateGuns;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -32,13 +33,13 @@ public class LivingEntityTarget extends Target {
     }
 
     @Override
-    public int getPenetrationCost() {
-        return 10;
+    public double getPenetrationCost() {
+        return UltimateGuns.getInstance().getEnvironmentConfig().getPenetrationCost(entity.getType());
     }
 
     @Override
     public double getRestitution() {
-        return 0.1;
+        return UltimateGuns.getInstance().getEnvironmentConfig().getRestitution(entity.getType());
     }
 
     @Override
