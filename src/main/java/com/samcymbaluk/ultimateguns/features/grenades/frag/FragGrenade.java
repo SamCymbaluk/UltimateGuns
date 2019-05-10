@@ -6,6 +6,7 @@ import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
 import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
 import com.samcymbaluk.ultimateguns.features.grenades.Grenade;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
+import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
 import org.bukkit.Location;
@@ -51,17 +52,25 @@ public class FragGrenade extends Grenade {
         double radius = conf.getExplosionRadius();
         List<Vector> vectors = getExplosionVectors(start.clone(), radius, radius, radius, false);
         for (Vector vector : vectors) {
-            UltimateGunsProjectile proj = new UltimateGunsProjectile(getThrower(), true, 50, 0, radius + 5);
+            UltimateGunsProjectile proj = new UltimateGunsProjectile(getThrower(), false, 50, 0, radius + 5);
             proj.start(center, vector, new ProjectileCallback() {
                 @Override
                 public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
-                    if (!hitTargets.contains(target)) {
-                        target.onHit(getThrower(),
-                                conf.getInitialDamage()
-                                - (conf.getDamageDropoff() * center.distance(target.getLocation())));
-                        hitTargets.add(target);
-                    }
-                    if (target instanceof BlockTarget) {
+                    if (target instanceof LivingEntityTarget) {
+                        LivingEntityTarget leTarget = (LivingEntityTarget) target;
+                        double distance = center.distance(target.getLocation());
+
+                        if (!hitTargets.contains(target)) {
+                            target.onHit(getThrower(),
+                                    conf.getInitialDamage()
+                                            - (conf.getDamageDropoff() * distance));
+                            hitTargets.add(target);
+                        }
+
+                        leTarget.getEntity().setVelocity(target.getLocation().subtract(loc).toVector()
+                                .normalize()
+                                .multiply(conf.getKnockback() / Math.max(1, distance * conf.getKnockbackDropoff())));
+                    } else if (target instanceof BlockTarget) {
                         BlockTarget bt = (BlockTarget) target;
 
                         if (!bt.getBlock().isPassable()) proj.kill();
