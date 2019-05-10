@@ -1,10 +1,14 @@
 package com.samcymbaluk.ultimateguns.features.guns;
 
+import com.samcymbaluk.ultimateguns.features.guns.projectiles.ProjectileType;
+import org.bukkit.entity.Projectile;
+
 public class GunCaliber {
 
-    private String id;
     private String name;
 
+    private int amount;
+    private ProjectileType projectileType;
     private int damage;
     private double muzzleVelocity;
     private double damageDropoff;
@@ -13,9 +17,10 @@ public class GunCaliber {
     private double armorPenetration;
     private double heatshotMultiplier;
 
-    public GunCaliber(String id, String name, int damage, double muzzleVelocity, double damageDropoff, double velocityDropoff, double penetration, double armorPenetration, double heatshotMultiplier) {
-        this.id = id;
+    public GunCaliber(String name, ProjectileType projectileType, int amount, int damage, double muzzleVelocity, double damageDropoff, double velocityDropoff, double penetration, double armorPenetration, double heatshotMultiplier) {
         this.name = name;
+        this.projectileType = projectileType;
+        this.amount = amount;
         this.damage = damage;
         this.muzzleVelocity = muzzleVelocity;
         this.damageDropoff = damageDropoff;
@@ -29,12 +34,16 @@ public class GunCaliber {
         return (int) Math.round((damage - (damageDropoff * distance)) / (velocityDropoff * (muzzleVelocity / velocity)));
     }
 
-    public String getId() {
-        return id;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public ProjectileType getProjectileType() {
+        return projectileType;
+    }
+
+    public int getAmount() {
+        return amount;
     }
 
     public int getDamage() {

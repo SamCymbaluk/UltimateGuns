@@ -1,21 +1,12 @@
 package com.samcymbaluk.ultimateguns.features.grenades.frag;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
-import com.samcymbaluk.ultimateguns.UltimateGunsProjectile;
-import com.samcymbaluk.ultimateguns.targets.BlockTarget;
-import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
-import com.samcymbaluk.ultimateguns.targets.Target;
-import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.RayTraceResult;
-import org.bukkit.util.Vector;
 
 public class FragListener implements Listener {
 
@@ -38,43 +29,6 @@ public class FragListener implements Listener {
                 event.setCancelled(true);
                 FragGrenade frag = new FragGrenade(fragFeature, player);
                 frag.throwGrenade();
-            }
-
-            // TODO remove debug
-            if (item.getType() == Material.GOLD_INGOT) {
-                event.setCancelled(true);
-                UltimateGunsProjectile proj = new UltimateGunsProjectile(player, true, 715./20., 0.25, 255);
-                proj.start(player.getEyeLocation(), player.getEyeLocation().getDirection(), new ProjectileCallback() {
-                    double penLeft = 30;
-
-                    @Override
-                    public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
-                        if (target instanceof LivingEntityTarget) {
-                            target.onHit(event.getPlayer(), 100);
-                        } else if (target instanceof BlockTarget) {
-                            if (!((BlockTarget) target).getBlock().isPassable()) {
-                                double penLost = 15;
-                                penLeft -= penLost;
-                                if (penLeft <= 0) proj.kill();
-                                path.multiply(((float) (30 - penLost)) / ((float) 30));
-                                Vector deflection = new Vector(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
-                                path.add(deflection.normalize().multiply(Math.sqrt(penLost) / 2));
-                                return path;
-                            }
-                        }
-                        return path;
-                    }
-
-                    @Override
-                    public void handleStep(Location start, Vector path, double velocity) {
-                        proj.debugProjectileEffect(start.toVector(), start.toVector().add(path));
-                    }
-
-                    @Override
-                    public void done(Location end) {
-
-                    }
-                });
             }
         }
     }
