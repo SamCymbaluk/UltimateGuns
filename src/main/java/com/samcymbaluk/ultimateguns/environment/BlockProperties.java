@@ -1,35 +1,36 @@
 package com.samcymbaluk.ultimateguns.environment;
 
-import org.bukkit.Material;
+import jdk.internal.jline.internal.Nullable;
 
 public class BlockProperties {
 
-    private double penetrationCost;
-    private double restitution;
+    private Double penetrationCost;
+    private Double restitution;
 
-    private boolean destructible;
-    private double destructionThreshold;
+    private Boolean destructible;
+    private Double destructionThreshold;
 
-    public BlockProperties(double penetrationCost, double restitution, boolean destructible, double destructionThreshold) {
+    public BlockProperties(Double penetrationCost, Double restitution, Boolean destructible, Double destructionThreshold) {
         this.penetrationCost = penetrationCost;
         this.restitution = restitution;
         this.destructible = destructible;
         this.destructionThreshold = destructionThreshold;
     }
 
-    public double getPenetrationCost() {
+    public Double getPenetrationCost() {
         return penetrationCost;
     }
 
-    public double getRestitution() {
+    public Double getRestitution() {
         return restitution;
     }
 
-    public boolean isDestructible() {
+    @Nullable
+    public Boolean isDestructible() {
         return destructible;
     }
 
-    public double getDestructionThreshold() {
+    public Double getDestructionThreshold() {
         return destructionThreshold;
     }
 }

@@ -1,22 +1,20 @@
 package com.samcymbaluk.ultimateguns.environment;
 
-import org.bukkit.entity.EntityType;
-
 public class EntityProperties {
 
-    private double penetrationCost;
-    private double restitution;
+    private Double penetrationCost;
+    private Double restitution;
 
-    public EntityProperties(double penetrationCost, double restitution) {
+    public EntityProperties(Double penetrationCost, Double restitution) {
         this.penetrationCost = penetrationCost;
         this.restitution = restitution;
     }
 
-    public double getPenetrationCost() {
+    public Double getPenetrationCost() {
         return penetrationCost;
     }
 
-    public double getRestitution() {
+    public Double getRestitution() {
         return restitution;
     }
 }

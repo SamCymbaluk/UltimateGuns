@@ -19,9 +19,11 @@ public class FragFeatureConfig extends GrenadeFeatureConfig {
 
     private double initialDamage = 30;
     private double damageDropoff = 2.5;
-    private double explosionRadius = 10;
+    private double explosionRadius = 7;
     private double knockback = 2;
     private double knockbackDropoff = 0.2;
+    private double penetration = 600;
+    private double penetrationDropoff = 20;
 
     private List<ConfigParticle> explosionParticles = Arrays.asList(
         new ConfigParticle(Particle.EXPLOSION_HUGE, 1, 0, 0, 0, 0.1, null, true),
@@ -68,6 +70,14 @@ public class FragFeatureConfig extends GrenadeFeatureConfig {
 
     public double getKnockbackDropoff() {
         return knockbackDropoff;
+    }
+
+    public double getPenetration() {
+        return penetration;
+    }
+
+    public double getPenetrationDropoff() {
+        return penetrationDropoff;
     }
 
     public List<ConfigParticle> getExplosionParticles() {

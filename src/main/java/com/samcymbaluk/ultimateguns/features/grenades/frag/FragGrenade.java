@@ -1,5 +1,6 @@
 package com.samcymbaluk.ultimateguns.features.grenades.frag;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.samcymbaluk.ultimateguns.UltimateGuns;
 import com.samcymbaluk.ultimateguns.UltimateGunsProjectile;
 import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
@@ -9,8 +10,11 @@ import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
@@ -53,7 +57,12 @@ public class FragGrenade extends Grenade {
         List<Vector> vectors = getExplosionVectors(start.clone(), radius, radius, radius, false);
         for (Vector vector : vectors) {
             UltimateGunsProjectile proj = new UltimateGunsProjectile(getThrower(), false, 50, 0, radius + 5);
+
+            AtomicDouble penetrationLeft = new AtomicDouble();
+            penetrationLeft.set(conf.getPenetration());
+
             proj.start(center, vector, new ProjectileCallback() {
+
                 @Override
                 public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
                     if (target instanceof LivingEntityTarget) {
@@ -70,11 +79,27 @@ public class FragGrenade extends Grenade {
                         leTarget.getEntity().setVelocity(target.getLocation().subtract(loc).toVector()
                                 .normalize()
                                 .multiply(conf.getKnockback() / Math.max(1, distance * conf.getKnockbackDropoff())));
+
+                        penetrationLeft.getAndAdd(-target.getPenetrationCost());
                     } else if (target instanceof BlockTarget) {
                         BlockTarget bt = (BlockTarget) target;
 
-                        if (!bt.getBlock().isPassable()) proj.kill();
+                        if (!bt.getBlock().isPassable()) {
+                            double pen = penetrationLeft.get() - (loc.distanceSquared(bt.getLocation()) * conf.getPenetrationDropoff());
+                            double threshold = UltimateGuns.getInstance().getEnvironmentConfig().getDestructionThreshold(bt.getBlock().getType());
+                            if (pen >= threshold) {
+                                BlockBreakEvent event = new BlockBreakEvent(bt.getBlock(), getThrower());
+                                Bukkit.getServer().getPluginManager().callEvent(event);
+                                if (!event.isCancelled()) {
+                                    bt.getBlock().setType(Material.AIR);
+                                }
+                            }
+                            penetrationLeft.getAndAdd(-target.getPenetrationCost());
+                        }
+                        // Don't remove penetration is block is passable
                     }
+
+                    if (penetrationLeft.get() < 0) proj.kill();
 
                     return path;
                 }
