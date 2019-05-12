@@ -48,7 +48,7 @@ public class UltimateGunsProjectile {
         this.loc = loc;
         this.callback = callback;
 
-        step(loc.clone(), direction.normalize().multiply(initialVelocity), 0, ignoreOwner ? new LivingEntityTarget(owner) : null);
+        step(loc.clone(), direction.clone().normalize().multiply(initialVelocity), 0, ignoreOwner ? new LivingEntityTarget(owner) : null);
 
     }
 
@@ -121,7 +121,9 @@ public class UltimateGunsProjectile {
         for (double i = 0; i < path.length(); i += 2.5) {
 
             Vector pos = start.clone().add(path.clone().normalize().multiply(i));
-            loc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, pos.toLocation(loc.getWorld()), 1, 0, 0, 0, 0, null, true);
+            for (Player p : loc.getWorld().getPlayers()) {
+                loc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, pos.toLocation(p.getWorld()), 1, 0, 0, 0, 0, null, true);
+            }
 
         }
     }

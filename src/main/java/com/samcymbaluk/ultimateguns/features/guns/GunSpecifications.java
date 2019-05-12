@@ -1,14 +1,17 @@
 package com.samcymbaluk.ultimateguns.features.guns;
 
-import com.samcymbaluk.ultimateguns.features.guns.projectiles.ProjectileType;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
 public class GunSpecifications {
 
-    private String gunName = "Gun";
+    private String gunName = "&l&7Gun";
+    private String ammoString = " &7<&e@&7:&e#&7>";
+    private String currentAmmoChar = "@";
+    private String maxAmmoChar = "#";
 
     private Material ammoType = Material.SLIME_BALL;
-    private String ammoName = "Mag";
+    private String ammoName = "&7Mag";
 
     private int roundsPerBurst = 1;
     private int bulletDelay = 1;
@@ -18,7 +21,7 @@ public class GunSpecifications {
     private double movingAccuracy = 0;
     private double jumpingAccuracy = 0;
 
-    private int clipSize = 30;
+    private int ammoSize = 30;
     private int reloadTime = 20;
 
     private double smokeSpacing = 1;
@@ -30,7 +33,7 @@ public class GunSpecifications {
         this.caliber = caliber;
     }
 
-    public GunSpecifications(String gunName, Material ammoType, String ammoName, int roundsPerBurst, int bulletDelay, boolean auto, double accuracy, double movingAccuracy, double jumpingAccuracy, int clipSize, int reloadTime, double smokeSpacing, int smokeSteps, String caliber) {
+    public GunSpecifications(String gunName, Material ammoType, String ammoName, int roundsPerBurst, int bulletDelay, boolean auto, double accuracy, double movingAccuracy, double jumpingAccuracy, int ammoSize, int reloadTime, double smokeSpacing, int smokeSteps, String caliber) {
         this.gunName = gunName;
         this.ammoType = ammoType;
         this.ammoName = ammoName;
@@ -40,15 +43,23 @@ public class GunSpecifications {
         this.accuracy = accuracy;
         this.movingAccuracy = movingAccuracy;
         this.jumpingAccuracy = jumpingAccuracy;
-        this.clipSize = clipSize;
+        this.ammoSize = ammoSize;
         this.reloadTime = reloadTime;
         this.smokeSpacing = smokeSpacing;
         this.smokeSteps = smokeSteps;
         this.caliber = caliber;
     }
 
+    public String getAmmoString(int currentAmmo) {
+        String str = ChatColor.translateAlternateColorCodes('&', ammoString);
+        str = str.replace(currentAmmoChar, Integer.toString(currentAmmo));
+        str = str.replace(maxAmmoChar, Integer.toString(ammoSize));
+        return str;
+    }
+
+
     public String getGunName() {
-        return gunName;
+        return ChatColor.translateAlternateColorCodes('&', gunName);
     }
 
     public Material getAmmoType() {
@@ -56,7 +67,7 @@ public class GunSpecifications {
     }
 
     public String getAmmoName() {
-        return ammoName;
+        return ChatColor.translateAlternateColorCodes('&', ammoName);
     }
 
     public int getRoundsPerBurst() {
@@ -83,8 +94,8 @@ public class GunSpecifications {
         return jumpingAccuracy;
     }
 
-    public int getClipSize() {
-        return clipSize;
+    public int getAmmoSize() {
+        return ammoSize;
     }
 
     public int getReloadTime() {

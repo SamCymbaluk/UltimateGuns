@@ -28,7 +28,7 @@ public class BlockTarget extends Target {
 
     @Override
     public double getPenetrationCost() {
-        return UltimateGuns.getInstance().getEnvironmentConfig().getPenetrationCost(block.getType());
+        return getBlock().isPassable() ? 0 : UltimateGuns.getInstance().getEnvironmentConfig().getPenetrationCost(block.getType());
     }
 
     @Override

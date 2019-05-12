@@ -1,9 +1,10 @@
 package com.samcymbaluk.ultimateguns.features.guns;
 
+import com.samcymbaluk.ultimateguns.config.util.PostProcessable;
 import com.samcymbaluk.ultimateguns.features.guns.projectiles.ProjectileType;
-import org.bukkit.entity.Projectile;
+import org.bukkit.ChatColor;
 
-public class GunCaliber {
+public class GunCaliber implements PostProcessable {
 
     private String name;
 
@@ -28,6 +29,11 @@ public class GunCaliber {
         this.penetration = penetration;
         this.armorPenetration = armorPenetration;
         this.heatshotMultiplier = heatshotMultiplier;
+    }
+
+    @Override
+    public void gsonPostProcess() {
+        name = ChatColor.translateAlternateColorCodes('&', name);
     }
 
     public int calcDamage(double distance, double velocity) {
