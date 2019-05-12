@@ -1,4 +1,4 @@
-/**
+/*
  * Author: uksspy
  * <p>
  * MIT License
@@ -31,9 +31,18 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 import com.samcymbaluk.ultimateguns.config.util.PostProcessingEnabler;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 /**
@@ -46,6 +55,7 @@ public class ConfigLoader {
     private static JsonParser parser = new JsonParser();
     private static Gson gson = new GsonBuilder()
             .setPrettyPrinting()
+            .disableHtmlEscaping()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .registerTypeAdapterFactory(new PostProcessingEnabler())
             .create();
@@ -62,12 +72,19 @@ public class ConfigLoader {
     public static <T> T loadConfig(Class<T> clazz, File file, T fallback) throws IOException {
         if (file.createNewFile()) { //File does not exist, save fallback to file
             String json = gson.toJson(fallback);
-            try (PrintWriter out = new PrintWriter(file)) {
-                out.println(json);
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+                writer.write(json);
             }
             return fallback;
         } else { //File exists, load from file
-            return gson.fromJson(new String(Files.readAllBytes(file.toPath())), clazz);
+            StringBuilder stringBuilder = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line);
+                }
+            }
+            return gson.fromJson(stringBuilder.toString(), clazz);
         }
     }
 
