@@ -60,6 +60,10 @@ public class ConfigLoader {
             .registerTypeAdapterFactory(new PostProcessingEnabler())
             .create();
 
+    public static Gson getParser() {
+        return gson;
+    }
+
     /**
      * Loads a provided config object from a given JSON file.
      * If the file does not exist it also creates the file using the given object defaults

@@ -1,8 +1,15 @@
 package com.samcymbaluk.ultimateguns.features.guns;
 
+import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
+import com.samcymbaluk.ultimateguns.config.util.ConfigPotionEffect;
 import com.samcymbaluk.ultimateguns.config.util.PostProcessable;
 import com.samcymbaluk.ultimateguns.features.guns.projectiles.ProjectileType;
 import org.bukkit.ChatColor;
+import org.bukkit.Particle;
+import org.bukkit.potion.PotionEffectType;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class GunCaliber implements PostProcessable {
 
@@ -18,6 +25,21 @@ public class GunCaliber implements PostProcessable {
     private double armorPenetration;
     private double heatshotMultiplier;
 
+    private ConfigParticle fireParticle = new ConfigParticle(Particle.SMOKE_NORMAL, 4, 0, 0, 0, 0F, null, true);
+    private double fireParticleSpacing = 0.5;
+    private int fireParticleAmount = 6;
+
+    private double impactParticleLength = 1;
+    private int impactParticleAmount = 25;
+    private float impactParticleSpread = 0.015F;
+    private boolean impactSound = true;
+
+    private double hitParticleLength = 1;
+    private int hitParticleAmount = 25;
+    private float hitParticleSpread = 0.015F;
+
+    private List<ConfigPotionEffect> hitEffects = Arrays.asList(new ConfigPotionEffect(PotionEffectType.BLINDNESS, 10, 5));
+
     public GunCaliber(String name, ProjectileType projectileType, int amount, int damage, double muzzleVelocity, double damageDropoff, double velocityDropoff, double penetration, double armorPenetration, double heatshotMultiplier) {
         this.name = name;
         this.projectileType = projectileType;
@@ -29,6 +51,53 @@ public class GunCaliber implements PostProcessable {
         this.penetration = penetration;
         this.armorPenetration = armorPenetration;
         this.heatshotMultiplier = heatshotMultiplier;
+    }
+
+    public GunCaliber(String name, int amount, ProjectileType projectileType, int damage, double muzzleVelocity, double damageDropoff, double velocityDropoff, double penetration, double armorPenetration, double heatshotMultiplier, ConfigParticle fireParticle, double fireParticleSpacing, int fireParticleAmount, double impactParticleLength, int impactParticleAmount, float impactParticleSpread, boolean impactSound, double hitParticleLength, int hitParticleAmount, float hitParticleSpread) {
+        this.name = name;
+        this.amount = amount;
+        this.projectileType = projectileType;
+        this.damage = damage;
+        this.muzzleVelocity = muzzleVelocity;
+        this.damageDropoff = damageDropoff;
+        this.velocityDropoff = velocityDropoff;
+        this.penetration = penetration;
+        this.armorPenetration = armorPenetration;
+        this.heatshotMultiplier = heatshotMultiplier;
+        this.fireParticle = fireParticle;
+        this.fireParticleSpacing = fireParticleSpacing;
+        this.fireParticleAmount = fireParticleAmount;
+        this.impactParticleLength = impactParticleLength;
+        this.impactParticleAmount = impactParticleAmount;
+        this.impactParticleSpread = impactParticleSpread;
+        this.impactSound = impactSound;
+        this.hitParticleLength = hitParticleLength;
+        this.hitParticleAmount = hitParticleAmount;
+        this.hitParticleSpread = hitParticleSpread;
+    }
+
+    public GunCaliber(String name, int amount, ProjectileType projectileType, int damage, double muzzleVelocity, double damageDropoff, double velocityDropoff, double penetration, double armorPenetration, double heatshotMultiplier, ConfigParticle fireParticle, double fireParticleSpacing, int fireParticleAmount, double impactParticleLength, int impactParticleAmount, float impactParticleSpread, boolean impactSound, double hitParticleLength, int hitParticleAmount, float hitParticleSpread, List<ConfigPotionEffect> hitEffects) {
+        this.name = name;
+        this.amount = amount;
+        this.projectileType = projectileType;
+        this.damage = damage;
+        this.muzzleVelocity = muzzleVelocity;
+        this.damageDropoff = damageDropoff;
+        this.velocityDropoff = velocityDropoff;
+        this.penetration = penetration;
+        this.armorPenetration = armorPenetration;
+        this.heatshotMultiplier = heatshotMultiplier;
+        this.fireParticle = fireParticle;
+        this.fireParticleSpacing = fireParticleSpacing;
+        this.fireParticleAmount = fireParticleAmount;
+        this.impactParticleLength = impactParticleLength;
+        this.impactParticleAmount = impactParticleAmount;
+        this.impactParticleSpread = impactParticleSpread;
+        this.impactSound = impactSound;
+        this.hitParticleLength = hitParticleLength;
+        this.hitParticleAmount = hitParticleAmount;
+        this.hitParticleSpread = hitParticleSpread;
+        this.hitEffects = hitEffects;
     }
 
     @Override
@@ -78,5 +147,49 @@ public class GunCaliber implements PostProcessable {
 
     public double getHeatshotMultiplier() {
         return heatshotMultiplier;
+    }
+
+    public ConfigParticle getFireParticle() {
+        return fireParticle;
+    }
+
+    public double getFireParticleSpacing() {
+        return fireParticleSpacing;
+    }
+
+    public int getFireParticleAmount() {
+        return fireParticleAmount;
+    }
+
+    public double getImpactParticleLength() {
+        return impactParticleLength;
+    }
+
+    public int getImpactParticleAmount() {
+        return impactParticleAmount;
+    }
+
+    public float getImpactParticleSpread() {
+        return impactParticleSpread;
+    }
+
+    public boolean hasImpactSound() {
+        return impactSound;
+    }
+
+    public double getHitParticleLength() {
+        return hitParticleLength;
+    }
+
+    public int getHitParticleAmount() {
+        return hitParticleAmount;
+    }
+
+    public float getHitParticleSpread() {
+        return hitParticleSpread;
+    }
+
+    public List<ConfigPotionEffect> getHitEffects() {
+        return hitEffects;
     }
 }

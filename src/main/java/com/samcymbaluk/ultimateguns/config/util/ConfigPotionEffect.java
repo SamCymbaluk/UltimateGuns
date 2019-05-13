@@ -8,6 +8,12 @@ import org.bukkit.potion.PotionEffectType;
 
 public class ConfigPotionEffect implements PostProcessable {
 
+    public static void addAll(Iterable<ConfigPotionEffect> effects, LivingEntity entity, boolean force) {
+        for (ConfigPotionEffect effect : effects) {
+            effect.add(entity, force);
+        }
+    }
+
     private String type;
     private int duration;
     private int amplifier;

@@ -86,8 +86,7 @@ public class FragGrenade extends Grenade {
 
                         if (!bt.getBlock().isPassable()) {
                             double pen = penetrationLeft.get() - (loc.distanceSquared(bt.getLocation()) * conf.getPenetrationDropoff());
-                            double threshold = UltimateGuns.getInstance().getEnvironmentConfig().getDestructionThreshold(bt.getBlock().getType());
-                            if (pen >= threshold) {
+                            if (pen >= bt.getDestructionThreshold() && bt.isDestructible()) {
                                 BlockBreakEvent event = new BlockBreakEvent(bt.getBlock(), getThrower());
                                 Bukkit.getServer().getPluginManager().callEvent(event);
                                 if (!event.isCancelled()) {

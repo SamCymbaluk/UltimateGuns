@@ -1,6 +1,9 @@
 package com.samcymbaluk.ultimateguns.environment;
 
+import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
+import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 
 import java.util.HashMap;
@@ -9,13 +12,25 @@ import java.util.Map;
 
 public class EnvironmentConfig {
 
-    private BlockProperties defaultBlockProperties = new BlockProperties(500D, 0.4D, true, 500D);
+    private BlockProperties defaultBlockProperties = new BlockProperties(
+            500D,
+            0.4D,
+            true,
+            500D
+    );
 
-    private EntityProperties defaultEntityProperties = new EntityProperties(10D, 0.1D);
+    private EntityProperties defaultEntityProperties = new EntityProperties(
+            10D,
+            0.1D,
+            coloredDustParticle(3, Color.RED, 1)
+    );
 
     private Map<Material, BlockProperties> blockProperties = new LinkedHashMap<Material, BlockProperties>(){{
+        put(Material.WATER, new BlockProperties(25D, null, false, null));
+        put(Material.LAVA, new BlockProperties(50D, null, false, null));
         put(Material.GLASS, new BlockProperties(1D, 0.5, true, 5D));
         put(Material.GLASS_PANE, new BlockProperties(1D, 0.5, true, 5D));
+        put(Material.FLOWER_POT, new BlockProperties(5D, 0.5, true, 5D));
         put(Material.GRASS_BLOCK, new BlockProperties(200D, null, null, 200D));
         put(Material.DIRT, new BlockProperties(200D, null, null, 200D));
         put(Material.GRASS_PATH, new BlockProperties(200D, null, null, 200D));
@@ -42,11 +57,12 @@ public class EnvironmentConfig {
         put(Material.JUNGLE_WOOD, new BlockProperties(25D, null, null, 200D));
         put(Material.OAK_WOOD, new BlockProperties(25D, null, null, 200D));
         put(Material.SPRUCE_WOOD, new BlockProperties(25D, null, null, 200D));
-        put(Material.SPRUCE_LEAVES, new BlockProperties(1D, 0.2, null, 10D));
-        put(Material.OAK_LEAVES, new BlockProperties(1D, 0.2, null, 10D));
-        put(Material.JUNGLE_LEAVES, new BlockProperties(1D, 0.2, null, 10D));
-        put(Material.DARK_OAK_LEAVES, new BlockProperties(1D, 0.2, null, 10D));
-        put(Material.BIRCH_LEAVES, new BlockProperties(1D, 0.2, null, 10D));
+        put(Material.SPRUCE_LEAVES, new BlockProperties(1D, 0.2, null, 50D));
+        put(Material.ACACIA_LEAVES, new BlockProperties(1D, 0.2, null, 50D));
+        put(Material.OAK_LEAVES, new BlockProperties(1D, 0.2, null, 50D));
+        put(Material.JUNGLE_LEAVES, new BlockProperties(1D, 0.2, null, 50D));
+        put(Material.DARK_OAK_LEAVES, new BlockProperties(1D, 0.2, null, 50D));
+        put(Material.BIRCH_LEAVES, new BlockProperties(1D, 0.2, null, 50D));
         put(Material.ACACIA_PLANKS, new BlockProperties(20D, null, null, 200D));
         put(Material.BIRCH_PLANKS, new BlockProperties(20D, null, null, 200D));
         put(Material.DARK_OAK_PLANKS, new BlockProperties(20D, null, null, 200D));
@@ -145,7 +161,22 @@ public class EnvironmentConfig {
     }};
 
     private Map<EntityType, EntityProperties> entityProperties = new HashMap<EntityType, EntityProperties>(){{
-
+        put(EntityType.BLAZE, new EntityProperties(null, null, coloredDustParticle(3, Color.YELLOW, 1)));
+        put(EntityType.CAVE_SPIDER, new EntityProperties(null, null, coloredDustParticle(3, Color.BLUE, 0.5F)));
+        put(EntityType.CREEPER, new EntityProperties(null, null, coloredDustParticle(3, Color.GREEN, 1)));
+        put(EntityType.ENDER_DRAGON, new EntityProperties(null, null, coloredDustParticle(3, Color.FUCHSIA, 1)));
+        put(EntityType.ENDERMAN, new EntityProperties(null, null, coloredDustParticle(3, Color.FUCHSIA, 1)));
+        put(EntityType.ENDERMITE, new EntityProperties(null, null, coloredDustParticle(3, Color.FUCHSIA, 1)));
+        put(EntityType.GHAST, new EntityProperties(null, null, coloredDustParticle(3, Color.WHITE, 1)));
+        put(EntityType.IRON_GOLEM, new EntityProperties(50D, null, coloredDustParticle(1, Color.WHITE, 2)));
+        put(EntityType.MAGMA_CUBE, new EntityProperties(null, null, coloredDustParticle(3, Color.YELLOW, 1)));
+        put(EntityType.PHANTOM, new EntityProperties(null, null, coloredDustParticle(3, Color.FUCHSIA, 1)));
+        put(EntityType.SKELETON, new EntityProperties(null, null, coloredDustParticle(3, Color.GRAY, 1)));
+        put(EntityType.SKELETON_HORSE, new EntityProperties(null, null, coloredDustParticle(3, Color.GRAY, 1)));
+        put(EntityType.SLIME, new EntityProperties(null, null, coloredDustParticle(3, Color.LIME, 3)));
+        put(EntityType.SPIDER, new EntityProperties(null, null, coloredDustParticle(3, Color.BLUE, 0.5F)));
+        put(EntityType.WITHER, new EntityProperties(null, null, coloredDustParticle(3, Color.BLACK, 1)));
+        put(EntityType.WITHER_SKELETON, new EntityProperties(null, null, coloredDustParticle(3, Color.BLACK, 1)));
     }};
 
     public double getPenetrationCost(Material blockType) {
@@ -174,6 +205,16 @@ public class EnvironmentConfig {
     }
 
     public double getDestructionThreshold(Material blockType) {
-        return blockProperties.getOrDefault(blockType, defaultBlockProperties).getDestructionThreshold();
+        Double destructionThreshold = blockProperties.getOrDefault(blockType, defaultBlockProperties).getDestructionThreshold();
+        return destructionThreshold != null ? destructionThreshold : defaultBlockProperties.getDestructionThreshold();
+    }
+
+    public ConfigParticle getGibsParticle(EntityType entityType) {
+        ConfigParticle particle = entityProperties.getOrDefault(entityType, defaultEntityProperties).getGibsParticle();
+        return particle != null ? particle : defaultEntityProperties.getGibsParticle();
+    }
+
+    private ConfigParticle coloredDustParticle(int count, Color color, float size) {
+        return new ConfigParticle(Particle.REDSTONE, count, 0, 0, 0, 0, new Particle.DustOptions(color, size), true);
     }
 }

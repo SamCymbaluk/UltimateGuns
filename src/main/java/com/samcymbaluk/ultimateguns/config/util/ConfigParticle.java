@@ -1,5 +1,6 @@
 package com.samcymbaluk.ultimateguns.config.util;
 
+import com.samcymbaluk.ultimateguns.config.ConfigLoader;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -24,6 +25,10 @@ public class ConfigParticle implements PostProcessable {
     @Override
     public void gsonPostProcess() {
         Validate.notNull(particle, "Invalid particle name");
+
+        // Hacky method to convert data to the correct type
+        String json = ConfigLoader.getParser().toJson(data);
+        data = ConfigLoader.getParser().fromJson(json, particle.getDataType());
     }
 
     public ConfigParticle(Particle particle, int count, double rx, double ry, double rz, double extra, Object data, boolean forceDisplay) {

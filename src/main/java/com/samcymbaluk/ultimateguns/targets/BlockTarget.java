@@ -28,7 +28,11 @@ public class BlockTarget extends Target {
 
     @Override
     public double getPenetrationCost() {
-        return getBlock().isPassable() ? 0 : UltimateGuns.getInstance().getEnvironmentConfig().getPenetrationCost(block.getType());
+        if (block.isPassable() && !block.isLiquid()) {
+            return 0;
+        } else {
+            return UltimateGuns.getInstance().getEnvironmentConfig().getPenetrationCost(block.getType());
+        }
     }
 
     @Override
@@ -49,7 +53,7 @@ public class BlockTarget extends Target {
         return UltimateGuns.getInstance().getEnvironmentConfig().isDestructible(block.getType());
     }
 
-    public double destructionThreshold() {
+    public double getDestructionThreshold() {
         return UltimateGuns.getInstance().getEnvironmentConfig().getDestructionThreshold(block.getType());
     }
 

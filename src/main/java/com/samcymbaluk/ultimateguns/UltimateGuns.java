@@ -1,5 +1,7 @@
 package com.samcymbaluk.ultimateguns;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.samcymbaluk.ultimateguns.config.ConfigLoader;
 import com.samcymbaluk.ultimateguns.config.UltimateGunsConfig;
 import com.samcymbaluk.ultimateguns.environment.EnvironmentConfig;
@@ -18,6 +20,7 @@ public class UltimateGuns extends JavaPlugin {
 
     private static UltimateGuns instance;
 
+    private ProtocolManager protocolManager;
     private UltimateGunsConfig config;
     private EnvironmentConfig environmentConfig;
 
@@ -32,6 +35,7 @@ public class UltimateGuns extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        protocolManager = ProtocolLibrary.getProtocolManager();
 
         File dataFolder = this.getDataFolder();
         dataFolder.mkdir();
@@ -75,6 +79,10 @@ public class UltimateGuns extends JavaPlugin {
         }
 
         PluginFeatures.getInstance().enableFeatures();
+    }
+
+    public ProtocolManager getProtocolManager() {
+        return protocolManager;
     }
 
     public EnvironmentConfig getEnvironmentConfig() {
