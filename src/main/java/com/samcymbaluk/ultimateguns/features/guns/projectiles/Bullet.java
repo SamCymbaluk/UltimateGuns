@@ -5,18 +5,18 @@ import com.samcymbaluk.ultimateguns.UltimateGunsProjectile;
 import com.samcymbaluk.ultimateguns.config.util.ConfigParticle;
 import com.samcymbaluk.ultimateguns.config.util.ConfigPotionEffect;
 import com.samcymbaluk.ultimateguns.features.guns.Gun;
+import com.samcymbaluk.ultimateguns.features.guns.GunCaliber;
 import com.samcymbaluk.ultimateguns.features.guns.GunFeature;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
+import com.samcymbaluk.ultimateguns.util.NmsUtil;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.util.RayTraceResult;
@@ -28,8 +28,8 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
     private UltimateGunsProjectile proj;
     private double penLeft;
 
-    public Bullet(Gun gun, LivingEntity owner) {
-        super(gun, owner);
+    public Bullet(Gun gun, GunCaliber caliber, Player owner) {
+        super(gun, caliber, owner);
     }
 
     @Override
@@ -37,14 +37,15 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
         proj = new UltimateGunsProjectile(
                 getOwner(),
                 true,
-                getGun().getCaliber().getMuzzleVelocity() / 20.0,
+                getCaliber().getMuzzleVelocity() / 20.0,
                 GunFeature.getInstance().getConfig().getGravity(),
-                255
-                );
+                255);
 
-        penLeft = getGun().getCaliber().getPenetration();
+        penLeft = getCaliber().getPenetration();
         Location start = getOwner().getEyeLocation().subtract(0, 0.25, 0);
         Vector path = getOwner().getLocation().getDirection();
+        getGun().applyRecoil(path);
+        getGun().applyAccuracy(path, UltimateGuns.getInstance().getGunPlayer(getOwner()));
 
         proj.start(start, path, this);
         shotEffect(start, path);
@@ -74,10 +75,10 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
         Vector deflection = new Vector(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
         path.add(deflection.normalize().multiply(Math.sqrt(penLost) / 2));
 
-        if (target instanceof BlockTarget && getOwner() instanceof Player) {
+        if (target instanceof BlockTarget) {
             BlockTarget bt = (BlockTarget) target;
             if (penLeft >= bt.getDestructionThreshold() && bt.isDestructible()) {
-                BlockBreakEvent event = new BlockBreakEvent(bt.getBlock(), (Player) getOwner());
+                BlockBreakEvent event = new BlockBreakEvent(bt.getBlock(), getOwner());
                 Bukkit.getServer().getPluginManager().callEvent(event);
                 if (!event.isCancelled()) {
                     bt.getBlock().setType(Material.AIR);
@@ -90,9 +91,9 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
     }
 
     private void impactEffect(Location impactLoc, BlockTarget blockTarget, Vector path) {
-        double length = getGun().getCaliber().getImpactParticleLength();
-        int amount = getGun().getCaliber().getImpactParticleAmount();
-        float spread = getGun().getCaliber().getImpactParticleSpread();
+        double length = getCaliber().getImpactParticleLength();
+        int amount = getCaliber().getImpactParticleAmount();
+        float spread = getCaliber().getImpactParticleSpread();
 
         Block endBlock = blockTarget.getBlock();
         if (endBlock.isPassable() && !endBlock.isLiquid()) return;
@@ -104,15 +105,15 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
             impactLoc.getWorld().spawnParticle(Particle.BLOCK_DUST, impactLoc, 1, i * spread, i * spread, i * spread, 0.05F, endBlock.getBlockData(), true);
         }
 
-        if (getGun().getCaliber().hasImpactSound()) {
-            impactLoc.getWorld().playSound(impactLoc, Sound.BLOCK_GRASS_STEP, 1, 1);
+        if (getCaliber().hasImpactSound()) {
+            impactLoc.getWorld().playSound(impactLoc, NmsUtil.blockSound(endBlock), 1, 1);
         }
     }
 
     private void hitEffect(Location hitLoc, LivingEntityTarget target, Vector path) {
-        double length = getGun().getCaliber().getHitParticleLength();
-        int amount = getGun().getCaliber().getHitParticleAmount();
-        float spread = getGun().getCaliber().getHitParticleSpread();
+        double length = getCaliber().getHitParticleLength();
+        int amount = getCaliber().getHitParticleAmount();
+        float spread = getCaliber().getHitParticleSpread();
 
         ConfigParticle gibsParticle = UltimateGuns.getInstance().getEnvironmentConfig().getGibsParticle(target.getEntity().getType());
 
@@ -132,7 +133,7 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
             );
         }
 
-        ConfigPotionEffect.addAll(getGun().getCaliber().getHitEffects(), target.getEntity(), true);
+        ConfigPotionEffect.addAll(getCaliber().getHitEffects(), target.getEntity(), true);
     }
 
     @Override
