@@ -54,8 +54,4 @@ public class GunFeature extends PluginFeature<GunFeatureConfig> {
         return config;
     }
 
-    public boolean isGun(Material mat) {
-        return getConfig().getGunSpecifications(mat) != null;
-    }
-
 }

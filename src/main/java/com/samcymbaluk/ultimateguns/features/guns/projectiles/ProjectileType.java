@@ -1,19 +1,20 @@
 package com.samcymbaluk.ultimateguns.features.guns.projectiles;
 
 import com.samcymbaluk.ultimateguns.features.guns.Gun;
-import org.bukkit.entity.LivingEntity;
+import com.samcymbaluk.ultimateguns.features.guns.GunCaliber;
+import org.bukkit.entity.Player;
 
 public enum ProjectileType {
 
     BULLET() {
         @Override
-        public GunProjectile getProjectile(Gun gun, LivingEntity owner) {
-            return new Bullet(gun, owner);
+        public GunProjectile getProjectile(Gun gun, GunCaliber caliber, Player owner) {
+            return new Bullet(gun, caliber, owner);
         }
     },
     ROCKET;
 
-    public GunProjectile getProjectile(Gun gun, LivingEntity owner) {
+    public GunProjectile getProjectile(Gun gun, GunCaliber caliber, Player owner) {
         return null;
     }
 }

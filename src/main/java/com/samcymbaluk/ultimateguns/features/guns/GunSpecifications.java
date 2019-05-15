@@ -1,17 +1,19 @@
 package com.samcymbaluk.ultimateguns.features.guns;
 
+import com.google.common.collect.Sets;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
+import java.util.List;
+import java.util.Set;
+
 public class GunSpecifications {
 
-    private String gunName = "&l&7Gun";
-    private String ammoString = " &7<&e@&7:&e#&7>";
-    private String currentAmmoChar = "@";
-    private String maxAmmoChar = "#";
+    private String id;
+    private Material material;
 
-    private Material ammoType = Material.SLIME_BALL;
-    private String ammoName = "&7Mag";
+    private String gunName = "&l&7Gun";
+    private String ammoString = " &7<&e@&7>";
 
     private int roundsPerBurst = 1;
     private int bulletDelay = 1;
@@ -21,53 +23,51 @@ public class GunSpecifications {
     private double movingAccuracy = 0;
     private double jumpingAccuracy = 0;
 
-    private int ammoSize = 30;
     private int reloadTime = 20;
 
-    private double smokeSpacing = 1;
-    private int smokeSteps = 5;
+    private int individualAmmoCapacity = 1;
 
-    private String caliber;
+    private Set<String> supportedAmmo;
 
-    public GunSpecifications(String caliber) {
-        this.caliber = caliber;
+    public GunSpecifications(String id, Material material, Set<String> supportedAmmo) {
+        this.id = id;
+        this.material = material;
+        this.supportedAmmo = Sets.newHashSet(supportedAmmo);
     }
 
-    public GunSpecifications(String gunName, Material ammoType, String ammoName, int roundsPerBurst, int bulletDelay, boolean auto, double accuracy, double movingAccuracy, double jumpingAccuracy, int ammoSize, int reloadTime, double smokeSpacing, int smokeSteps, String caliber) {
+    public GunSpecifications(String id, Material material, String gunName, int roundsPerBurst, int bulletDelay, boolean auto, double accuracy, double movingAccuracy, double jumpingAccuracy, int reloadTime, int individualAmmoCapacity, Set<String> supportedAmmo) {
+        this.id = id;
+        this.material = material;
         this.gunName = gunName;
-        this.ammoType = ammoType;
-        this.ammoName = ammoName;
         this.roundsPerBurst = roundsPerBurst;
         this.bulletDelay = bulletDelay;
         this.auto = auto;
         this.accuracy = accuracy;
         this.movingAccuracy = movingAccuracy;
         this.jumpingAccuracy = jumpingAccuracy;
-        this.ammoSize = ammoSize;
         this.reloadTime = reloadTime;
-        this.smokeSpacing = smokeSpacing;
-        this.smokeSteps = smokeSteps;
-        this.caliber = caliber;
+        this.individualAmmoCapacity = individualAmmoCapacity;
+        this.supportedAmmo = Sets.newHashSet(supportedAmmo);
     }
 
-    public String getAmmoString(int currentAmmo) {
+    public String getAmmoString(int currentAmmo, boolean loaded) {
         String str = ChatColor.translateAlternateColorCodes('&', ammoString);
-        str = str.replace(currentAmmoChar, Integer.toString(currentAmmo));
-        str = str.replace(maxAmmoChar, Integer.toString(ammoSize));
+
+        String ammoReplacement = loaded ? Integer.toString(currentAmmo) : "-";
+        str = str.replace(GunFeature.getInstance().getConfig().getCurrentAmmoPlaceholder(), ammoReplacement);
         return str;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public Material getMaterial() {
+        return material;
+    }
 
     public String getGunName() {
         return ChatColor.translateAlternateColorCodes('&', gunName);
-    }
-
-    public Material getAmmoType() {
-        return ammoType;
-    }
-
-    public String getAmmoName() {
-        return ChatColor.translateAlternateColorCodes('&', ammoName);
     }
 
     public int getRoundsPerBurst() {
@@ -94,23 +94,24 @@ public class GunSpecifications {
         return jumpingAccuracy;
     }
 
-    public int getAmmoSize() {
-        return ammoSize;
-    }
-
     public int getReloadTime() {
         return reloadTime;
     }
 
-    public double getSmokeSpacing() {
-        return smokeSpacing;
+    public int getIndividualAmmoCapacity() {
+        return individualAmmoCapacity;
     }
 
-    public int getSmokeSteps() {
-        return smokeSteps;
+    public Set<String> getSupportedAmmo() {
+        return supportedAmmo;
     }
 
-    public String getCaliber() {
-        return caliber;
+    public boolean isSupported(String ammo) {
+        return supportedAmmo.contains(ammo);
     }
+
+    public boolean isSupported(GunAmmo ammo) {
+        return supportedAmmo.contains(ammo.getId());
+    }
+
 }

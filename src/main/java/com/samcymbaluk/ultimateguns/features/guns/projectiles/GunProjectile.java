@@ -1,17 +1,20 @@
 package com.samcymbaluk.ultimateguns.features.guns.projectiles;
 
 import com.samcymbaluk.ultimateguns.features.guns.Gun;
+import com.samcymbaluk.ultimateguns.features.guns.GunCaliber;
 import org.bukkit.Location;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 abstract public class GunProjectile {
 
     private Gun gun;
-    private LivingEntity owner;
+    private Player owner;
+    private GunCaliber caliber;
 
-    public GunProjectile(Gun gun, LivingEntity owner) {
+    public GunProjectile(Gun gun, GunCaliber caliber, Player owner) {
         this.gun = gun;
+        this.caliber = caliber;
         this.owner = owner;
     }
 
@@ -21,17 +24,21 @@ abstract public class GunProjectile {
         return gun;
     }
 
-    public LivingEntity getOwner() {
+    public GunCaliber getCaliber() {
+        return caliber;
+    }
+
+    public Player getOwner() {
         return owner;
     }
 
     public void shotEffect(Location start, Vector path) {
         Location pos = start.clone();
-        Vector add = path.clone().normalize().multiply(getGun().getCaliber().getFireParticleSpacing());
+        Vector add = path.clone().normalize().multiply(caliber.getFireParticleSpacing());
 
-        for (int i = 0; i < getGun().getCaliber().getFireParticleAmount(); i++) {
+        for (int i = 0; i < caliber.getFireParticleAmount(); i++) {
             pos.add(add);
-            getGun().getCaliber().getFireParticle().spawn(pos);
+            caliber.getFireParticle().spawn(pos);
 
             // Prevent particles from going through walls
             if(!pos.getBlock().isPassable()) break;
