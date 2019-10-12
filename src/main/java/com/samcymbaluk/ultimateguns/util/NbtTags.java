@@ -1,8 +1,8 @@
 package com.samcymbaluk.ultimateguns.util;
 
-import net.minecraft.server.v1_13_R2.ItemStack;
-import net.minecraft.server.v1_13_R2.NBTTagCompound;
-import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
+import net.minecraft.server.v1_14_R1.ItemStack;
+import net.minecraft.server.v1_14_R1.NBTTagCompound;
+import org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack;
 import java.lang.reflect.Field;
 import java.util.UUID;
 

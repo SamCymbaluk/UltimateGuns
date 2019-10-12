@@ -4,21 +4,21 @@ import com.samcymbaluk.ultimateguns.UltimateGuns;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
-import net.minecraft.server.v1_13_R2.EntityArmorStand;
-import net.minecraft.server.v1_13_R2.EnumItemSlot;
-import net.minecraft.server.v1_13_R2.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_13_R2.PacketPlayOutEntityTeleport;
-import net.minecraft.server.v1_13_R2.PacketPlayOutSpawnEntityLiving;
-import net.minecraft.server.v1_13_R2.PacketPlayOutEntityEquipment;
-import net.minecraft.server.v1_13_R2.Vector3f;
-import net.minecraft.server.v1_13_R2.WorldServer;
+import net.minecraft.server.v1_14_R1.EntityArmorStand;
+import net.minecraft.server.v1_14_R1.EnumItemSlot;
+import net.minecraft.server.v1_14_R1.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_14_R1.PacketPlayOutEntityTeleport;
+import net.minecraft.server.v1_14_R1.PacketPlayOutSpawnEntityLiving;
+import net.minecraft.server.v1_14_R1.PacketPlayOutEntityEquipment;
+import net.minecraft.server.v1_14_R1.Vector3f;
+import net.minecraft.server.v1_14_R1.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -51,8 +51,7 @@ public class GrenadeProjectile {
     public void start(Location start, double velocity) {
         WorldServer s = ((CraftWorld) ent.getLocation().getWorld()).getHandle();
 
-        stand = new EntityArmorStand(s);
-        stand.setLocation(ent.getLocation().getX(), ent.getLocation().getY(), ent.getLocation().getZ(), 0, 0);
+        stand = new EntityArmorStand(s, ent.getLocation().getX(), ent.getLocation().getY(), ent.getLocation().getZ());
         stand.setInvisible(true);
         stand.setRightArmPose(new Vector3f(0, -90F,  -18F));
 

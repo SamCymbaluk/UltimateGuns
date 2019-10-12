@@ -1,13 +1,13 @@
 package com.samcymbaluk.ultimateguns.util;
 
-import net.minecraft.server.v1_13_R2.Block;
-import net.minecraft.server.v1_13_R2.BlockPosition;
-import net.minecraft.server.v1_13_R2.MinecraftKey;
-import net.minecraft.server.v1_13_R2.SoundEffect;
-import net.minecraft.server.v1_13_R2.SoundEffectType;
-import net.minecraft.server.v1_13_R2.World;
+import net.minecraft.server.v1_14_R1.Block;
+import net.minecraft.server.v1_14_R1.BlockPosition;
+import net.minecraft.server.v1_14_R1.MinecraftKey;
+import net.minecraft.server.v1_14_R1.SoundEffect;
+import net.minecraft.server.v1_14_R1.SoundEffectType;
+import net.minecraft.server.v1_14_R1.World;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
 
 import java.lang.reflect.Field;
 
@@ -17,9 +17,9 @@ public class NmsUtil {
         try {
             World nmsWorld = ((CraftWorld) block.getWorld()).getHandle();
             Block nmsBlock = nmsWorld.getType(new BlockPosition(block.getX(), block.getY(), block.getZ())).getBlock();
-            SoundEffectType soundEffectType = nmsBlock.getStepSound();
+            SoundEffectType soundEffectType = nmsBlock.getStepSound(nmsBlock.getBlockData());
 
-            Field breakSound = SoundEffectType.class.getDeclaredField("q");
+            Field breakSound = SoundEffectType.class.getDeclaredField("y");
             breakSound.setAccessible(true);
             SoundEffect nmsSound = (SoundEffect) breakSound.get(soundEffectType);
 

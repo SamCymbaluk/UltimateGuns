@@ -1,7 +1,7 @@
 package com.samcymbaluk.ultimateguns.features.guns;
 
 import com.samcymbaluk.ultimateguns.util.NbtTags;
-import net.minecraft.server.v1_13_R2.ItemMapEmpty;
+import net.minecraft.server.v1_14_R1.ItemMapEmpty;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
