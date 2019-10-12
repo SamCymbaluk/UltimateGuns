@@ -12,6 +12,7 @@ import jdk.internal.jline.internal.Nullable;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -95,6 +96,10 @@ public class Gun {
         }, s -> s.equals("") ? null : Integer.parseInt(s), 0);
     }
 
+    /*
+     * Firing
+     */
+
     public void handleClick(PlayerInteractEvent event) {
         long tick = UltimateGuns.getInstance().getTick();
         Player player = event.getPlayer();
@@ -138,46 +143,63 @@ public class Gun {
             return;
         }
 
-        System.out.println(loadedAmmoType.get());
         GunProjectile proj = loadedAmmoType.get().getCaliber().getProjectileType().getProjectile(this, loadedAmmoType.get().getCaliber(), gunPlayer.getPlayer());
         proj.fire();
         remainingAmmo.set(remainingAmmo.get() - 1);
+
+        if (remainingAmmo.get() == 0 && loadedAmmoType.get().isIndividual()) {
+            loadedAmmoType.set(null);
+        }
     }
 
-    public void reload(UltimateGunsPlayer gunPlayer) {
+    /*
+     * Reloading
+     */
+
+    public void load(UltimateGunsPlayer gunPlayer) {
         // Already loading
         if (reloadTime > 0) return;
-        Player player = gunPlayer.getPlayer();
 
-        // Locate ammo in inv
+        Player player = gunPlayer.getPlayer();
         ItemStack ammoItem = getAmmo(gunPlayer.getPlayer());
 
-        ejectMag(gunPlayer);
-
-        // Inv has valid ammo, begin reload
-        if (ammoItem != null) {
-            player.getInventory().removeItem(ammoItem);
-            GunAmmo ammoType = GunAmmo.fromItem(ammoItem);
-
-            reloadTask(gunPlayer, ammoItem, ammoType, () -> {
-                insertMeg(gunPlayer, ammoItem, ammoType);
-            });
+        if (isLoaded()) { // Unload
+            unload(gunPlayer, ammoItem);
+        } else { // Reload
+            // Inv has valid ammo, begin reload
+            if (ammoItem != null) {
+                reload(gunPlayer, ammoItem);
+            }
         }
     }
 
-    private ItemStack getAmmo(Player player) {
-        for (int i = 35; i >= 0; i--) {
-            ItemStack item = player.getInventory().getItem(i);
-            if (item == null) continue;
-
-            if (GunFeature.getInstance().getConfig().isAmmoMaterial(item.getType())) {
-                GunAmmo ammo = GunAmmo.fromItem(item);
-                if (ammo != null && getSpecifications().isSupported(ammo)) {
-                    return item;
-                }
+    private void unload(UltimateGunsPlayer gunPlayer, ItemStack ammoItem) {
+        if (loadedAmmoType.get().isIndividual()) {
+            // Only unload if we can't reload
+            if (ammoItem == null) {
+                ejectAmmo(gunPlayer);
+            } else {
+                reload(gunPlayer, ammoItem);
             }
+        } else {
+            ejectMag(gunPlayer);
         }
-        return null;
+    }
+
+    private void reload(UltimateGunsPlayer gunPlayer, ItemStack ammoItem) {
+        Player player = gunPlayer.getPlayer();
+
+        GunAmmo ammoType = GunAmmo.fromItem(ammoItem);
+
+        if (ammoType.isIndividual()) {
+            if (remainingAmmo.get() < this.getSpecifications().getIndividualAmmoCapacity()) {
+                PlayerUtil.removeSingleItem(player, ammoItem);
+                reloadTask(gunPlayer, ammoItem, ammoType, () -> insertAmmo(ammoType));
+            }
+        } else {
+            PlayerUtil.removeSingleItem(player, ammoItem);
+            reloadTask(gunPlayer, ammoItem, ammoType, () -> insertMeg(ammoItem, ammoType));
+        }
     }
 
     private void reloadTask(UltimateGunsPlayer gunsPlayer, ItemStack ammoItem, GunAmmo ammoType, Runnable callback) {
@@ -198,21 +220,55 @@ public class Gun {
         }
     }
 
-    private void ejectMag(UltimateGunsPlayer gunsPlayer) {
-        if (isLoaded() && !loadedAmmoType.get().isIndividual()) {
-            GunAmmo ammoType = loadedAmmoType.get();
-            loadedAmmoType.set(null);
-            ItemStack mag = ammoType.createItem(remainingAmmo.get());
-            remainingAmmo.set(0);
-
-            PlayerUtil.safeAdd(gunsPlayer.getPlayer(), mag);
-        }
-    }
-
-    private void insertMeg(UltimateGunsPlayer gunsPlayer, ItemStack ammoItem, GunAmmo ammoType) {
+    private void insertMeg(ItemStack ammoItem, GunAmmo ammoType) {
         this.loadedAmmoType.set(ammoType);
         this.remainingAmmo.set(GunAmmo.getAmmo(ammoItem));
     }
+
+    private void insertAmmo(GunAmmo ammoType) {
+        this.loadedAmmoType.set(ammoType);
+        this.remainingAmmo.set(this.remainingAmmo.get() + 1);
+    }
+
+    private void ejectMag(UltimateGunsPlayer gunsPlayer) {
+        GunAmmo ammoType = loadedAmmoType.get();
+        loadedAmmoType.set(null);
+        ItemStack mag = ammoType.createItem(remainingAmmo.get());
+        remainingAmmo.set(0);
+
+        PlayerUtil.safeAdd(gunsPlayer.getPlayer(), mag);
+    }
+
+    private void ejectAmmo(UltimateGunsPlayer gunsPlayer) {
+        GunAmmo ammoType = loadedAmmoType.get();
+        ItemStack ammo = ammoType.createItem(1);
+        remainingAmmo.set(remainingAmmo.get() - 1);
+
+        if (remainingAmmo.get() == 0) {
+            loadedAmmoType.set(null);
+        }
+
+        PlayerUtil.safeAdd(gunsPlayer.getPlayer(), ammo);
+    }
+
+    private ItemStack getAmmo(Player player) {
+        for (int i = 35; i >= 0; i--) {
+            ItemStack item = player.getInventory().getItem(i);
+            if (item == null) continue;
+
+            if (GunFeature.getInstance().getConfig().isAmmoMaterial(item.getType())) {
+                GunAmmo ammo = GunAmmo.fromItem(item);
+                if (ammo != null && getSpecifications().isSupported(ammo)) {
+                    return item;
+                }
+            }
+        }
+        return null;
+    }
+
+    /*
+     * Recoil and Accuracy
+     */
 
     public void applyAccuracy(Vector path, UltimateGunsPlayer gunsPlayer) {
         boolean moving = false;
@@ -253,6 +309,10 @@ public class Gun {
         vertRecoil += (Math.random() * VERTICAL_RECOIL);
         horiRecoil += (2 * Math.random() * HORIZONTAL_RECOIL) - (HORIZONTAL_RECOIL);
     }
+
+    /*
+     * Accessors
+     */
 
     public GunSpecifications getSpecifications() {
         return specifications;

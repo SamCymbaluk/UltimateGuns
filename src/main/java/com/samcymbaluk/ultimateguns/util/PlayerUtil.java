@@ -12,4 +12,12 @@ public class PlayerUtil {
             player.getLocation().getWorld().dropItemNaturally(player.getLocation(), extra);
         }
     }
+
+    public static void removeSingleItem(Player player, ItemStack item) {
+        if (item.getAmount() > 1) {
+            item.setAmount(item.getAmount() - 1);
+        } else {
+            player.getInventory().removeItem(item);
+        }
+    }
 }

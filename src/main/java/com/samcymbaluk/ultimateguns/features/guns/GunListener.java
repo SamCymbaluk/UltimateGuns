@@ -40,7 +40,7 @@ public class GunListener implements Listener {
             event.setCancelled(true);
             // Loading 'item' would result in item desync in Gun
             Gun gun = Gun.loadGun(event.getPlayer().getInventory().getItemInMainHand());
-            gun.reload(UltimateGuns.getInstance().getGunPlayer(event.getPlayer()));
+            gun.load(UltimateGuns.getInstance().getGunPlayer(event.getPlayer()));
         }
     }
 }
