@@ -33,7 +33,8 @@ public class GunFeatureConfig extends PluginFeatureConfig implements PostProcess
     private transient Map<String, GunAmmo> ammoItemsMap = new HashMap<>();
 
     private List<GunSpecifications> guns = Arrays.asList(
-        new GunSpecifications("556_gun", Material.GOLDEN_HOE, Collections.singleton("m4_mag"))
+        new GunSpecifications("556_gun", Material.GOLDEN_HOE, Collections.singleton("m4_mag")),
+        new GunSpecifications("556_gun_individual", Material.GOLDEN_SHOVEL, Collections.singleton("556_bullet"))
     );
 
     private transient Map<Material, GunSpecifications> gunsMap = new HashMap<>();

@@ -5,13 +5,12 @@ import com.google.common.cache.CacheBuilder;
 import com.samcymbaluk.ultimateguns.UltimateGuns;
 import com.samcymbaluk.ultimateguns.UltimateGunsPlayer;
 import com.samcymbaluk.ultimateguns.features.guns.projectiles.GunProjectile;
+import com.samcymbaluk.ultimateguns.util.NBTStoredValue;
 import com.samcymbaluk.ultimateguns.util.NbtTags;
 import com.samcymbaluk.ultimateguns.util.PlayerUtil;
 import jdk.internal.jline.internal.Nullable;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -21,6 +20,7 @@ import org.bukkit.util.Vector;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public class Gun {
 
@@ -60,28 +60,39 @@ public class Gun {
     private long lastFired = 0;
     private long lastClick = 0;
     private int reloadTime = 0;
-    private int reloadAmount = 0;
     private boolean auto = false;
     private double vertRecoil = 0;
     private double horiRecoil = 0;
 
     // NBT stored
-    private String uuid;
-    private Integer remainingAmmo;
-    private GunAmmo loadedAmmoType;
+    private NBTStoredValue<String> uuid;
+    private NBTStoredValue<Integer> remainingAmmo;
+    //private Integer remainingAmmo;
+    private NBTStoredValue<GunAmmo> loadedAmmoType;
+    //private GunAmmo loadedAmmoType;
 
     public Gun(GunSpecifications specifications, ItemStack item) {
-        this.specifications = specifications;
-        this.item = item;
-
-        setUuid(UUID.randomUUID().toString());
-        setRemainingAmmo(0);
+        this(UUID.randomUUID().toString(), specifications, item);
     }
 
     public Gun(String uuid, GunSpecifications specifications, ItemStack item) {
-        this.uuid = uuid;
+        this.uuid = new NBTStoredValue<>(item, GunFeature.GUN_NBT_KEY + "_uuid", Function.identity(), Function.identity());
+        this.uuid.set(uuid);
         this.specifications = specifications;
         this.item = item;
+
+        this.loadedAmmoType = new NBTStoredValue<>(item, GunFeature.GUN_NBT_KEY + "_loaded_ammo_type",
+                ammoType -> ammoType == null ? "" : ammoType.getId(),
+                ammoStr -> GunFeature.getInstance().getConfig().getGunAmmo(ammoStr));
+
+        this.remainingAmmo = new NBTStoredValue<>(item, GunFeature.GUN_NBT_KEY + "_remaining_ammo", ammo -> {
+            String ammoStr = Integer.toString(ammo);
+            ItemMeta im = this.item.getItemMeta();
+            im.setDisplayName(this.specifications.getGunName() + this.specifications.getAmmoString(ammo, isLoaded()));
+            this.item.setItemMeta(im);
+
+            return ammoStr;
+        }, s -> s.equals("") ? null : Integer.parseInt(s), 0);
     }
 
     public void handleClick(PlayerInteractEvent event) {
@@ -98,7 +109,7 @@ public class Gun {
             auto = (tick - lastClick) >= 3 && (tick - lastClick) <= 5;
         }
 
-        int remainingAmmo = getRemainingAmmo();
+        int remainingAmmo = this.remainingAmmo.get();
         if (remainingAmmo == 0) player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
         if ((tick - lastFired) >= specifications.getBulletDelay() && remainingAmmo > 0) {
             fire(player);
@@ -122,14 +133,15 @@ public class Gun {
     public void fire(UltimateGunsPlayer gunPlayer) {
         Player player = gunPlayer.getPlayer();
 
-        if (getRemainingAmmo() < 1) {
+        if (remainingAmmo.get() < 1) {
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
             return;
         }
 
-        GunProjectile proj = getLoadedAmmoType().getCaliber().getProjectileType().getProjectile(this, getLoadedAmmoType().getCaliber(), gunPlayer.getPlayer());
+        System.out.println(loadedAmmoType.get());
+        GunProjectile proj = loadedAmmoType.get().getCaliber().getProjectileType().getProjectile(this, loadedAmmoType.get().getCaliber(), gunPlayer.getPlayer());
         proj.fire();
-        setRemainingAmmo(getRemainingAmmo() - 1);
+        remainingAmmo.set(remainingAmmo.get() - 1);
     }
 
     public void reload(UltimateGunsPlayer gunPlayer) {
@@ -187,19 +199,19 @@ public class Gun {
     }
 
     private void ejectMag(UltimateGunsPlayer gunsPlayer) {
-        if (getLoadedAmmoType() != null && !getLoadedAmmoType().isIndividual()) {
-            GunAmmo ammoType = getLoadedAmmoType();
-            setLoadedAmmoType((GunAmmo) null);
-            ItemStack mag = ammoType.createItem(getRemainingAmmo());
-            setRemainingAmmo(0);
+        if (isLoaded() && !loadedAmmoType.get().isIndividual()) {
+            GunAmmo ammoType = loadedAmmoType.get();
+            loadedAmmoType.set(null);
+            ItemStack mag = ammoType.createItem(remainingAmmo.get());
+            remainingAmmo.set(0);
 
             PlayerUtil.safeAdd(gunsPlayer.getPlayer(), mag);
         }
     }
 
     private void insertMeg(UltimateGunsPlayer gunsPlayer, ItemStack ammoItem, GunAmmo ammoType) {
-        setLoadedAmmoType(ammoType);
-        setRemainingAmmo(GunAmmo.getAmmo(ammoItem));
+        this.loadedAmmoType.set(ammoType);
+        this.remainingAmmo.set(GunAmmo.getAmmo(ammoItem));
     }
 
     public void applyAccuracy(Vector path, UltimateGunsPlayer gunsPlayer) {
@@ -247,51 +259,10 @@ public class Gun {
     }
 
     public String getUuid() {
-        return uuid;
-    }
-
-
-    private void setUuid(String uuid) {
-        this.uuid = uuid;
-        item = NbtTags.setNBTData(item, GunFeature.GUN_NBT_KEY + "_uuid", uuid);
-    }
-
-    public int getRemainingAmmo() {
-        if (remainingAmmo == null) {
-            remainingAmmo = Integer.parseInt(NbtTags.getNBTData(item, GunFeature.GUN_NBT_KEY + "_remaining_ammo"));
-        }
-        return remainingAmmo;
-    }
-
-    public void setRemainingAmmo(int ammo) {
-        remainingAmmo = ammo;
-        item = NbtTags.setNBTData(item, GunFeature.GUN_NBT_KEY + "_remaining_ammo", Integer.toString(ammo));
-        ItemMeta im = item.getItemMeta();
-        im.setDisplayName(specifications.getGunName() + specifications.getAmmoString(ammo, isLoaded()));
-        item.setItemMeta(im);
+        return uuid.get();
     }
 
     public boolean isLoaded() {
-        return getLoadedAmmoType() != null;
+        return this.loadedAmmoType.get() != null;
     }
-
-    @Nullable
-    public GunAmmo getLoadedAmmoType() {
-        if (loadedAmmoType == null) {
-            loadedAmmoType = GunFeature.getInstance().getConfig().getGunAmmo(NbtTags.getNBTData(item, GunFeature.GUN_NBT_KEY + "_loaded_ammo_type"));
-        }
-        return loadedAmmoType;
-    }
-
-    public void setLoadedAmmoType(String ammoType) {
-        GunAmmo ammo = GunFeature.getInstance().getConfig().getGunAmmo(ammoType);
-        Validate.notNull(ammo, "Invalid ammo type");
-        setLoadedAmmoType(ammo);
-    }
-
-    public void setLoadedAmmoType(GunAmmo ammoType) {
-        loadedAmmoType = ammoType;
-        item = NbtTags.setNBTData(item, GunFeature.GUN_NBT_KEY + "_loaded_ammo_type", ammoType == null ? "" : ammoType.getId());
-    }
-
 }
