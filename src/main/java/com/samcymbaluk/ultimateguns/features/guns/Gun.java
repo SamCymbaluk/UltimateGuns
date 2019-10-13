@@ -25,6 +25,8 @@ import java.util.function.Function;
 
 public class Gun {
 
+    private static final int CLICK_DELAY = 4;
+
     private static final double VERTICAL_RECOIL = 1.0 / 64.0;
     private static final double HORIZONTAL_RECOIL = 1.0 / 64.0;
     private static final double RECOIL_RESET_TICKS = 5;
@@ -111,36 +113,45 @@ public class Gun {
         }
 
         if (specifications.isAuto()) {
-            auto = (tick - lastClick) >= 3 && (tick - lastClick) <= 5;
+            auto = (tick - lastClick) >= CLICK_DELAY - 1 && (tick - lastClick) <= CLICK_DELAY + 1;
         }
 
         int remainingAmmo = this.remainingAmmo.get();
         if (remainingAmmo == 0) player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
         if ((tick - lastFired) >= specifications.getBulletDelay() && remainingAmmo > 0) {
             fire(player);
-            lastFired = tick;
-            /*
-            if (specifications.getRoundsPerBurst() > 1) {
-                new BurstShot(this, player, gunSpecifications.roundsPerBurst).runTaskTimer(Crisis.getInstance(), 0, 1);
-            } else if (isAuto()) {
-                int bulletDelay = gunSpecifications.bulletDelay;
-                new DelayShot(crisisGuns, this, player, (4 / bulletDelay) - 1).runTaskTimer(Crisis.getInstance(), bulletDelay, bulletDelay);
-            }*/
+            if (auto && specifications.getRoundsPerBurst() == 1) {
+                repeatedShots(player, (CLICK_DELAY - 2) / specifications.getBulletDelay(), specifications.getBulletDelay());
+            } else if (specifications.getRoundsPerBurst() > 1) {
+                repeatedShots(player, specifications.getRoundsPerBurst() - 1, 1);
+            }
         }
 
         lastClick = tick;
     }
 
-    public void fire(Player player) {
-        fire(UltimateGuns.getInstance().getGunPlayer(player));
+    private void repeatedShots(Player player, int shots, int delay) {
+        if (shots <= 0) return;
+        Bukkit.getScheduler().scheduleSyncDelayedTask(UltimateGuns.getInstance(), () -> {
+            if (player.getInventory().getItemInMainHand().equals(item)) {
+                if (fire(player)) {
+                    repeatedShots(player, shots - 1, delay);
+                }
+            }
+        }, delay);
     }
 
-    public void fire(UltimateGunsPlayer gunPlayer) {
+    public boolean fire(Player player) {
+        return fire(UltimateGuns.getInstance().getGunPlayer(player));
+    }
+
+    public boolean fire(UltimateGunsPlayer gunPlayer) {
+        lastFired = UltimateGuns.getInstance().getTick();
         Player player = gunPlayer.getPlayer();
 
         if (remainingAmmo.get() < 1) {
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
-            return;
+            return false;
         }
 
         GunProjectile proj = loadedAmmoType.get().getCaliber().getProjectileType().getProjectile(this, loadedAmmoType.get().getCaliber(), gunPlayer.getPlayer());
@@ -150,6 +161,7 @@ public class Gun {
         if (remainingAmmo.get() == 0 && loadedAmmoType.get().isIndividual()) {
             loadedAmmoType.set(null);
         }
+        return true;
     }
 
     /*
