@@ -1,16 +1,13 @@
 package com.samcymbaluk.ultimateguns;
 
-import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
@@ -22,7 +19,7 @@ public class UltimateGunsProjectile {
     private final LivingEntity owner;
     private final boolean ignoreOwner;
     private final double initialVelocity;
-    private final double velocityDropoff;
+    private final double dragCoefficient;
     private final double gravity;
     private final double maxDistance;
 
@@ -34,15 +31,15 @@ public class UltimateGunsProjectile {
      * @param owner
      * @param ignoreOwner
      * @param initialVelocity Initial velocity in metres per tick
-     * @param velocityDropoff
+     * @param dragCoefficient
      * @param gravity
      * @param maxDistance
      */
-    public UltimateGunsProjectile(LivingEntity owner, boolean ignoreOwner, double initialVelocity, double velocityDropoff, double gravity, double maxDistance) {
+    public UltimateGunsProjectile(LivingEntity owner, boolean ignoreOwner, double initialVelocity, double dragCoefficient, double gravity, double maxDistance) {
         this.owner = owner;
         this.ignoreOwner = ignoreOwner;
         this.initialVelocity = initialVelocity;
-        this.velocityDropoff = velocityDropoff;
+        this.dragCoefficient = dragCoefficient;
         this.gravity = gravity;
         this.maxDistance = maxDistance;
     }
@@ -106,7 +103,10 @@ public class UltimateGunsProjectile {
         path.add(new Vector(0, -gravity, 0));
 
         // Velocity drop off
-        path.multiply(1.0 - velocityDropoff);
+        // V = V * ((V - dV) / V)
+        // where dV = ((C/m)v^2*dt)
+        //       C/m is dragCoefficient
+        path.multiply(1.0 - dragCoefficient * path.length());
 
         // New step variables
         Location newStart = start;

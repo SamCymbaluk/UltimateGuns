@@ -38,7 +38,7 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
                 getOwner(),
                 true,
                 getCaliber().getMuzzleVelocity() / 20.0,
-                getCaliber().getVelocityDropoff(),
+                getCaliber().getDragCoefficient(),
                 GunFeature.getInstance().getConfig().getGravity(),
                 255);
 

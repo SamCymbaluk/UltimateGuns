@@ -33,9 +33,9 @@ public class GunFeatureConfig extends PluginFeatureConfig implements PostProcess
     );
 
     private List<GunCaliber> calibers = Arrays.asList(
-        new GunCaliber("9mm","9mm", ProjectileType.BULLET,1, 4, 375, 0.02, 0.10, 12, 0, 2),
-        new GunCaliber("556", "5.56×45mm", ProjectileType.BULLET, 1, 5, 960, 0.02, 0.05, 26, 0, 2),
-        new GunCaliber("birdshot", "Birdshot", ProjectileType.BULLET, 15, 2, 350, 0.1, 0.2, 6, 0, 1)
+        new GunCaliber("9mm","9mm", ProjectileType.BULLET,1, 4, 375, 0.02, 0.015, 12, 0, 2),
+        new GunCaliber("556", "5.56×45mm", ProjectileType.BULLET, 1, 5, 960, 0.02, 0.01, 26, 0, 2),
+        new GunCaliber("birdshot", "Birdshot", ProjectileType.BULLET, 15, 2, 350, 0.1, 0.02, 6, 0, 1)
     );
 
     private transient Map<String, GunCaliber> caliberMap = new HashMap<>();

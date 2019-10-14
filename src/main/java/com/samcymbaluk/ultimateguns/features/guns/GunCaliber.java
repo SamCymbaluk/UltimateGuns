@@ -21,7 +21,7 @@ public class GunCaliber implements PostProcessable {
     private int damage;
     private double muzzleVelocity;
     private double damageDropoff;
-    private double velocityDropoff;
+    private double dragCoefficient;
     private double penetration;
     private double armorPenetration;
     private double headshotMultiplier;
@@ -41,7 +41,7 @@ public class GunCaliber implements PostProcessable {
 
     private List<ConfigPotionEffect> hitEffects = Arrays.asList(new ConfigPotionEffect(PotionEffectType.BLINDNESS, 10, 5));
 
-    public GunCaliber(String id, String name, ProjectileType projectileType, int amount, int damage, double muzzleVelocity, double damageDropoff, double velocityDropoff, double penetration, double armorPenetration, double headshotMultiplier) {
+    public GunCaliber(String id, String name, ProjectileType projectileType, int amount, int damage, double muzzleVelocity, double damageDropoff, double dragCoefficient, double penetration, double armorPenetration, double headshotMultiplier) {
         this.id = id;
         this.name = name;
         this.projectileType = projectileType;
@@ -49,13 +49,13 @@ public class GunCaliber implements PostProcessable {
         this.damage = damage;
         this.muzzleVelocity = muzzleVelocity;
         this.damageDropoff = damageDropoff;
-        this.velocityDropoff = velocityDropoff;
+        this.dragCoefficient = dragCoefficient;
         this.penetration = penetration;
         this.armorPenetration = armorPenetration;
         this.headshotMultiplier = headshotMultiplier;
     }
 
-    public GunCaliber(String id, String name, int amount, ProjectileType projectileType, int damage, double muzzleVelocity, double damageDropoff, double velocityDropoff, double penetration, double armorPenetration, double headshotMultiplier, ConfigParticle fireParticle, double fireParticleSpacing, int fireParticleAmount, double impactParticleLength, int impactParticleAmount, float impactParticleSpread, boolean impactSound, double hitParticleLength, int hitParticleAmount, float hitParticleSpread) {
+    public GunCaliber(String id, String name, int amount, ProjectileType projectileType, int damage, double muzzleVelocity, double damageDropoff, double dragCoefficient, double penetration, double armorPenetration, double headshotMultiplier, ConfigParticle fireParticle, double fireParticleSpacing, int fireParticleAmount, double impactParticleLength, int impactParticleAmount, float impactParticleSpread, boolean impactSound, double hitParticleLength, int hitParticleAmount, float hitParticleSpread) {
         this.id = id;
         this.name = name;
         this.amount = amount;
@@ -63,7 +63,7 @@ public class GunCaliber implements PostProcessable {
         this.damage = damage;
         this.muzzleVelocity = muzzleVelocity;
         this.damageDropoff = damageDropoff;
-        this.velocityDropoff = velocityDropoff;
+        this.dragCoefficient = dragCoefficient;
         this.penetration = penetration;
         this.armorPenetration = armorPenetration;
         this.headshotMultiplier = headshotMultiplier;
@@ -79,7 +79,7 @@ public class GunCaliber implements PostProcessable {
         this.hitParticleSpread = hitParticleSpread;
     }
 
-    public GunCaliber(String id, String name, int amount, ProjectileType projectileType, int damage, double muzzleVelocity, double damageDropoff, double velocityDropoff, double penetration, double armorPenetration, double headshotMultiplier, ConfigParticle fireParticle, double fireParticleSpacing, int fireParticleAmount, double impactParticleLength, int impactParticleAmount, float impactParticleSpread, boolean impactSound, double hitParticleLength, int hitParticleAmount, float hitParticleSpread, List<ConfigPotionEffect> hitEffects) {
+    public GunCaliber(String id, String name, int amount, ProjectileType projectileType, int damage, double muzzleVelocity, double damageDropoff, double dragCoefficient, double penetration, double armorPenetration, double headshotMultiplier, ConfigParticle fireParticle, double fireParticleSpacing, int fireParticleAmount, double impactParticleLength, int impactParticleAmount, float impactParticleSpread, boolean impactSound, double hitParticleLength, int hitParticleAmount, float hitParticleSpread, List<ConfigPotionEffect> hitEffects) {
         this.id = id;
         this.name = name;
         this.amount = amount;
@@ -87,7 +87,7 @@ public class GunCaliber implements PostProcessable {
         this.damage = damage;
         this.muzzleVelocity = muzzleVelocity;
         this.damageDropoff = damageDropoff;
-        this.velocityDropoff = velocityDropoff;
+        this.dragCoefficient = dragCoefficient;
         this.penetration = penetration;
         this.armorPenetration = armorPenetration;
         this.headshotMultiplier = headshotMultiplier;
@@ -110,7 +110,7 @@ public class GunCaliber implements PostProcessable {
     }
 
     public int calcDamage(double distance, double velocity) {
-        return (int) Math.round((damage - (damageDropoff * distance)) / (velocityDropoff * (muzzleVelocity / velocity)));
+        return (int) Math.round((damage - (damageDropoff * distance)) / (dragCoefficient * (muzzleVelocity / velocity)));
     }
 
     public String getId() {
@@ -141,8 +141,8 @@ public class GunCaliber implements PostProcessable {
         return damageDropoff;
     }
 
-    public double getVelocityDropoff() {
-        return velocityDropoff;
+    public double getDragCoefficient() {
+        return dragCoefficient;
     }
 
     public double getPenetration() {
