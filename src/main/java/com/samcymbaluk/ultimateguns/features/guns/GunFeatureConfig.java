@@ -4,6 +4,7 @@ import com.samcymbaluk.ultimateguns.config.util.PostProcessable;
 import com.samcymbaluk.ultimateguns.features.PluginFeatureConfig;
 import com.samcymbaluk.ultimateguns.features.guns.projectiles.ProjectileType;
 import org.apache.commons.lang.Validate;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
 import java.util.Arrays;
@@ -17,6 +18,19 @@ import java.util.Set;
 public class GunFeatureConfig extends PluginFeatureConfig implements PostProcessable {
 
     private boolean debug = true;
+
+    private List<String> reloadMessages = Arrays.asList(
+            "&cReloading",
+            "&aR&celoading",
+            "&aRe&cloading",
+            "&aRel&coading",
+            "&aRelo&cading",
+            "&aReloa&cding",
+            "&aReload&cing",
+            "&aReloadi&cng",
+            "&aReloadin&cg",
+            "&aReloading"
+    );
 
     private List<GunCaliber> calibers = Arrays.asList(
         new GunCaliber("9mm","9mm", ProjectileType.BULLET,1, 4, 375, 0.02, 0.10, 12, 0, 2),
@@ -70,6 +84,11 @@ public class GunFeatureConfig extends PluginFeatureConfig implements PostProcess
             ammoMaterials.add(ammo.getMaterial());
         }
 
+        // Interpret color codes
+        for (int i = 0; i < reloadMessages.size(); i++) {
+            reloadMessages.set(i, ChatColor.translateAlternateColorCodes('&', reloadMessages.get(i)));
+        }
+
         // Validate data
         for (GunSpecifications specs : guns) {
             for (String ammo : specs.getSupportedAmmo()) {
@@ -84,6 +103,11 @@ public class GunFeatureConfig extends PluginFeatureConfig implements PostProcess
 
     public boolean isDebug() {
         return debug;
+    }
+
+    public String getReloadMessage(int current, int total) {
+        int index = (current * (reloadMessages.size() - 1)) / total;
+        return reloadMessages.get(index);
     }
 
     public boolean isGunMaterial(Material material) {

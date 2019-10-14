@@ -9,10 +9,11 @@ import com.samcymbaluk.ultimateguns.util.NBTStoredValue;
 import com.samcymbaluk.ultimateguns.util.NbtTags;
 import com.samcymbaluk.ultimateguns.util.PlayerUtil;
 import jdk.internal.jline.internal.Nullable;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -226,10 +227,11 @@ public class Gun {
 
         if (gunsPlayer.getPlayer().getInventory().getItemInMainHand().equals(this.item)) {
             reloadTime++;
-            gunsPlayer.getPlayer().sendMessage("tick: " + reloadTime);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(UltimateGuns.getInstance(), () -> reloadTask(gunsPlayer, ammoItem, ammoType, callback), 1);
+            gunsPlayer.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(
+                    GunFeature.getInstance().getConfig().getReloadMessage(reloadTime, ammoType.getReloadTime())));
+            Bukkit.getScheduler().scheduleSyncDelayedTask(UltimateGuns.getInstance(),
+                    () -> reloadTask(gunsPlayer, ammoItem, ammoType, callback), 1);
         } else {
-            gunsPlayer.getPlayer().sendMessage("Loading cancelled");
             reloadTime = 0;
             PlayerUtil.safeAdd(gunsPlayer.getPlayer(), ammoItem);
         }
