@@ -154,8 +154,11 @@ public class Gun {
             return false;
         }
 
-        GunProjectile proj = loadedAmmoType.get().getCaliber().getProjectileType().getProjectile(this, loadedAmmoType.get().getCaliber(), gunPlayer.getPlayer());
-        proj.fire();
+        GunCaliber caliber = loadedAmmoType.get().getCaliber();
+        for (int i = 0; i < caliber.getAmount(); i++) {
+            GunProjectile proj = loadedAmmoType.get().getCaliber().getProjectileType().getProjectile(this, caliber, gunPlayer.getPlayer());
+            proj.fire();
+        }
         remainingAmmo.set(remainingAmmo.get() - 1);
 
         if (remainingAmmo.get() == 0 && loadedAmmoType.get().isIndividual()) {

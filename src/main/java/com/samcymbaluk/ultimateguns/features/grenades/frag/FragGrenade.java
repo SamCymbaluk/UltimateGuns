@@ -56,7 +56,7 @@ public class FragGrenade extends Grenade {
         double radius = conf.getExplosionRadius();
         List<Vector> vectors = getExplosionVectors(start.clone(), radius, radius, radius, false);
         for (Vector vector : vectors) {
-            UltimateGunsProjectile proj = new UltimateGunsProjectile(getThrower(), false, 50, 0, radius + 5);
+            UltimateGunsProjectile proj = new UltimateGunsProjectile(getThrower(), false, 50, 0, 0, radius + 5);
 
             AtomicDouble penetrationLeft = new AtomicDouble();
             penetrationLeft.set(conf.getPenetration());
@@ -64,10 +64,9 @@ public class FragGrenade extends Grenade {
             proj.start(center, vector, new ProjectileCallback() {
 
                 @Override
-                public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
+                public Vector handleImpact(RayTraceResult impact, Target target, Vector path, double distance) {
                     if (target instanceof LivingEntityTarget) {
                         LivingEntityTarget leTarget = (LivingEntityTarget) target;
-                        double distance = center.distance(target.getLocation());
 
                         if (!hitTargets.contains(target)) {
                             target.onHit(getThrower(),

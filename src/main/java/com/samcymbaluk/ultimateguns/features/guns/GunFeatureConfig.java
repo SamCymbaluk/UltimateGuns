@@ -19,22 +19,27 @@ public class GunFeatureConfig extends PluginFeatureConfig implements PostProcess
     private boolean debug = true;
 
     private List<GunCaliber> calibers = Arrays.asList(
-        new GunCaliber("9mm","9mm", ProjectileType.BULLET,1, 4, 375, 0.02, 1, 12, 0, 2),
-        new GunCaliber("556", "5.56×45mm", ProjectileType.BULLET, 1, 5, 960, 0.02, 1, 26, 0, 2)
+        new GunCaliber("9mm","9mm", ProjectileType.BULLET,1, 4, 375, 0.02, 0.10, 12, 0, 2),
+        new GunCaliber("556", "5.56×45mm", ProjectileType.BULLET, 1, 5, 960, 0.02, 0.05, 26, 0, 2),
+        new GunCaliber("birdshot", "Birdshot", ProjectileType.BULLET, 15, 2, 350, 0.1, 0.2, 6, 0, 1)
     );
 
     private transient Map<String, GunCaliber> caliberMap = new HashMap<>();
 
     private List<GunAmmo> ammoItems = Arrays.asList(
         new GunAmmo("m4_mag", Material.GOLD_INGOT,"&7M4 Mag <&e@&7:&e#&7>", "556", false, 30, 40),
-        new GunAmmo("556_bullet", Material.GOLD_NUGGET,"&75.56×45mm", "556", true, 1, 5)
+        new GunAmmo("glock_mag", Material.SLIME_BALL,"&7Glock Mag <&e@&7:&e#&7>", "9mm", false, 15, 25),
+        new GunAmmo("556_bullet", Material.GOLD_NUGGET,"&75.56×45mm", "556", true, 1, 5),
+        new GunAmmo("birdshot_shell", Material.WHEAT_SEEDS,"&7Birdshot Shell", "birdshot", true, 1, 10)
     );
 
     private transient Map<String, GunAmmo> ammoItemsMap = new HashMap<>();
 
     private List<GunSpecifications> guns = Arrays.asList(
         new GunSpecifications("556_gun", Material.GOLDEN_HOE, Collections.singleton("m4_mag")),
-        new GunSpecifications("556_gun_individual", Material.GOLDEN_SHOVEL, Collections.singleton("556_bullet"))
+        new GunSpecifications("556_gun_individual", Material.GOLDEN_SHOVEL, Collections.singleton("556_bullet")),
+        new GunSpecifications("glock", Material.WOODEN_HOE, Collections.singleton("glock_mag")),
+        new GunSpecifications("shotgun", Material.WOODEN_AXE, Collections.singleton("birdshot_shell"))
     );
 
     private transient Map<Material, GunSpecifications> gunsMap = new HashMap<>();

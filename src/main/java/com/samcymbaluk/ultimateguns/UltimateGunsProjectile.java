@@ -22,6 +22,7 @@ public class UltimateGunsProjectile {
     private final LivingEntity owner;
     private final boolean ignoreOwner;
     private final double initialVelocity;
+    private final double velocityDropoff;
     private final double gravity;
     private final double maxDistance;
 
@@ -33,13 +34,15 @@ public class UltimateGunsProjectile {
      * @param owner
      * @param ignoreOwner
      * @param initialVelocity Initial velocity in metres per tick
+     * @param velocityDropoff
      * @param gravity
      * @param maxDistance
      */
-    public UltimateGunsProjectile(LivingEntity owner, boolean ignoreOwner, double initialVelocity, double gravity, double maxDistance) {
+    public UltimateGunsProjectile(LivingEntity owner, boolean ignoreOwner, double initialVelocity, double velocityDropoff, double gravity, double maxDistance) {
         this.owner = owner;
         this.ignoreOwner = ignoreOwner;
         this.initialVelocity = initialVelocity;
+        this.velocityDropoff = velocityDropoff;
         this.gravity = gravity;
         this.maxDistance = maxDistance;
     }
@@ -74,7 +77,7 @@ public class UltimateGunsProjectile {
         // Loop while there is a target and there is still (simulated) tick time left
         while ((rtResult = Target.rayTrace(start, path, pathLength * (1 - tickElapsed), ignoredTargets::contains)) != null && tickElapsed < 0.99) {
             Target target = Target.fromRayTrace(rtResult);
-            Vector newPath = callback.handleImpact(rtResult, target, path.clone());
+            Vector newPath = callback.handleImpact(rtResult, target, path.clone(), totalDistance + rtResult.getHitPosition().distance(start.toVector()));
             Location newStart = rtResult.getHitPosition().toLocation(loc.getWorld());
 
             callback.handleStep(start, newStart.clone().subtract(start).toVector(), pathLength);
@@ -99,8 +102,11 @@ public class UltimateGunsProjectile {
             start.add(path);
         }
 
-        //Gravity
+        // Gravity
         path.add(new Vector(0, -gravity, 0));
+
+        // Velocity drop off
+        path.multiply(1.0 - velocityDropoff);
 
         // New step variables
         Location newStart = start;

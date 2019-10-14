@@ -38,6 +38,7 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
                 getOwner(),
                 true,
                 getCaliber().getMuzzleVelocity() / 20.0,
+                getCaliber().getVelocityDropoff(),
                 GunFeature.getInstance().getConfig().getGravity(),
                 255);
 
@@ -52,12 +53,22 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
     }
 
     @Override
-    public Vector handleImpact(RayTraceResult impact, Target target, Vector path) {
+    public Vector handleImpact(RayTraceResult impact, Target target, Vector path, double distance) {
         if (target instanceof LivingEntityTarget) {
-            target.onHit(getOwner(), 100);
+
+            LivingEntityTarget leTarget = (LivingEntityTarget) target;
+            double damage = getCaliber().getDamage() - (distance * getCaliber().getDamageDropoff());
+            if (leTarget.getEntity() instanceof Player) {
+                boolean headshot = impact.getHitPosition().distanceSquared(leTarget.getEntity().getEyeLocation().toVector()) < 2*0.3*0.3;
+                damage = headshot ? damage * getCaliber().getHeadshotMultiplier() : damage;
+            }
+            target.onHit(getOwner(), damage);
             hitEffect(impact.getHitPosition().toLocation(target.getLocation().getWorld()), (LivingEntityTarget) target, path);
+
         } else if (target instanceof BlockTarget) {
+
             impactEffect(impact.getHitPosition().toLocation(target.getLocation().getWorld()), (BlockTarget) target, path);
+
         }
 
         handlePenetration(target, path);

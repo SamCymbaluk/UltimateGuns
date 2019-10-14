@@ -13,9 +13,10 @@ public interface ProjectileCallback {
      * @param impact The impact information
      * @param target The impacted target information
      * @param path The direction and magnitude (velocity) of the projectile when the impact occurred
+     * @param distance The total distance travelled by the projectile up until the impact
      * @return A vector representing the magnitude (velocity) and direction the projectile should now have
      */
-    Vector handleImpact(RayTraceResult impact, Target target, Vector path);
+    Vector handleImpact(RayTraceResult impact, Target target, Vector path, double distance);
 
     /**
      *
