@@ -67,6 +67,7 @@ public class Gun {
     private boolean auto = false;
     private double vertRecoil = 0;
     private double horiRecoil = 0;
+    private double lastRecoilTick = 0;
 
     // NBT stored
     private NBTStoredValue<String> uuid;
@@ -314,17 +315,22 @@ public class Gun {
     }
 
     public void applyRecoil(Vector path) {
-        Vector horiRecoilDir = new Vector(path.getZ(), 0, -path.getX());
-        Vector vertRecoilDir = path.getCrossProduct(horiRecoilDir);
+        // Prevent recoil being applied for every shot in multishot
+        if (lastRecoilTick != UltimateGuns.getInstance().getTick()) {
+            Vector horiRecoilDir = new Vector(path.getZ(), 0, -path.getX());
 
-        horiRecoilDir.normalize();
-        vertRecoilDir.normalize();
+            Vector vertRecoilDir = path.getCrossProduct(horiRecoilDir);
 
-        path.add(vertRecoilDir.multiply(vertRecoil));
-        path.add(horiRecoilDir.multiply(horiRecoil));
+            horiRecoilDir.normalize();
+            vertRecoilDir.normalize();
 
-        vertRecoil += (Math.random() * VERTICAL_RECOIL);
-        horiRecoil += (2 * Math.random() * HORIZONTAL_RECOIL) - (HORIZONTAL_RECOIL);
+            path.add(vertRecoilDir.multiply(vertRecoil));
+            path.add(horiRecoilDir.multiply(horiRecoil));
+
+            vertRecoil += (Math.random() * VERTICAL_RECOIL);
+            horiRecoil += (2 * Math.random() * HORIZONTAL_RECOIL) - (HORIZONTAL_RECOIL);
+        }
+        lastRecoilTick = UltimateGuns.getInstance().getTick();
     }
 
     /*
