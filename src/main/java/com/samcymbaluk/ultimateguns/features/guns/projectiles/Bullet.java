@@ -16,11 +16,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public class Bullet extends GunProjectile implements ProjectileCallback {
@@ -28,8 +31,11 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
     private UltimateGunsProjectile proj;
     private double penLeft;
 
+    private ThreadLocalRandom random;
+
     public Bullet(Gun gun, GunCaliber caliber, Player owner) {
         super(gun, caliber, owner);
+        random = ThreadLocalRandom.current();
     }
 
     @Override
@@ -116,8 +122,15 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
             impactLoc.getWorld().spawnParticle(Particle.BLOCK_DUST, impactLoc, 1, i * spread, i * spread, i * spread, 0.05F, endBlock.getBlockData(), true);
         }
 
+        float pitch = (float) random.nextDouble(0.7, 1.3);
         if (getCaliber().hasImpactSound()) {
-            impactLoc.getWorld().playSound(impactLoc, NmsUtil.blockSound(endBlock), 1, 1);
+            if (blockTarget.getBlock().getType() == Material.WATER) {
+                impactLoc.getWorld().playSound(impactLoc, Sound.ENTITY_BOAT_PADDLE_WATER, 1, pitch);
+            } else if (blockTarget.getBlock().getType() == Material.LAVA) {
+                impactLoc.getWorld().playSound(impactLoc, Sound.ITEM_BUCKET_FILL_LAVA, 1, pitch);
+            } else {
+                impactLoc.getWorld().playSound(impactLoc, NmsUtil.blockSound(endBlock), 1, pitch);
+            }
         }
     }
 
