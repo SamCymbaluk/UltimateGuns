@@ -9,6 +9,7 @@ import com.samcymbaluk.ultimateguns.features.guns.GunCaliber;
 import com.samcymbaluk.ultimateguns.features.guns.GunFeature;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
+import com.samcymbaluk.ultimateguns.targets.RayTraceTargetResult;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.NmsUtil;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
@@ -20,7 +21,6 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -59,24 +59,23 @@ public class Bullet extends GunProjectile implements ProjectileCallback {
     }
 
     @Override
-    public Vector handleImpact(RayTraceResult impact, Target target, Vector path, double distance) {
-        if (target instanceof LivingEntityTarget) {
+    public Vector handleImpact(RayTraceTargetResult impact, Vector path, double distance, double velocity) {
+        Target target = impact.getTarget();
+        double damage = getCaliber().getDamage() - (distance * getCaliber().getDamageDropoff());
+        damage *= velocity / (getCaliber().getMuzzleVelocity() / 20.0);
 
+        if (target instanceof LivingEntityTarget) {
             LivingEntityTarget leTarget = (LivingEntityTarget) target;
-            double damage = getCaliber().getDamage() - (distance * getCaliber().getDamageDropoff());
             if (leTarget.getEntity() instanceof Player) {
-                boolean headshot = impact.getHitPosition().distanceSquared(leTarget.getEntity().getEyeLocation().toVector()) < 2*0.3*0.3;
+                boolean headshot = impact.getRayTraceResult().getHitPosition().distanceSquared(leTarget.getEntity().getEyeLocation().toVector()) < 2*0.3*0.3;
                 damage = headshot ? damage * getCaliber().getHeadshotMultiplier() : damage;
             }
-            target.onHit(getOwner(), damage);
-            hitEffect(impact.getHitPosition().toLocation(target.getLocation().getWorld()), (LivingEntityTarget) target, path);
-
+            hitEffect(impact.getRayTraceResult().getHitPosition().toLocation(target.getLocation().getWorld()), (LivingEntityTarget) target, path);
         } else if (target instanceof BlockTarget) {
-
-            impactEffect(impact.getHitPosition().toLocation(target.getLocation().getWorld()), (BlockTarget) target, path);
-
+            impactEffect(impact.getRayTraceResult().getHitPosition().toLocation(target.getLocation().getWorld()), (BlockTarget) target, path);
         }
 
+        path = target.onHit(getOwner(), damage, impact, path.clone(), distance, velocity);
         handlePenetration(target, path);
 
         return path;

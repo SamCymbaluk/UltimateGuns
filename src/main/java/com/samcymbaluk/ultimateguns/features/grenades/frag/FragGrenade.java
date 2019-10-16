@@ -8,6 +8,7 @@ import com.samcymbaluk.ultimateguns.config.util.ConfigSound;
 import com.samcymbaluk.ultimateguns.features.grenades.Grenade;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
+import com.samcymbaluk.ultimateguns.targets.RayTraceTargetResult;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
 import org.bukkit.Bukkit;
@@ -64,14 +65,18 @@ public class FragGrenade extends Grenade {
             proj.start(center, vector, new ProjectileCallback() {
 
                 @Override
-                public Vector handleImpact(RayTraceResult impact, Target target, Vector path, double distance) {
+                public Vector handleImpact(RayTraceTargetResult impact, Vector path, double distance, double velocity) {
+                    Target target = impact.getTarget();
                     if (target instanceof LivingEntityTarget) {
                         LivingEntityTarget leTarget = (LivingEntityTarget) target;
 
                         if (!hitTargets.contains(target)) {
                             target.onHit(getThrower(),
-                                    conf.getInitialDamage()
-                                            - (conf.getDamageDropoff() * distance));
+                                    conf.getInitialDamage() - (conf.getDamageDropoff() * distance),
+                                    impact,
+                                    path,
+                                    distance,
+                                    velocity);
                             hitTargets.add(target);
                         }
 

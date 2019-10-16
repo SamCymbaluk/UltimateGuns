@@ -10,13 +10,17 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public abstract class Target {
 
-    private static List<Target> customTargets = new ArrayList<>();
+    private static Set<Target> customTargets = new HashSet<>();
 
     public static void registerCustomTarget(Target target) {
         customTargets.add(target);
@@ -26,8 +30,7 @@ public abstract class Target {
         customTargets.remove(target);
     }
 
-    public static RayTraceResult rayTrace(Location start, Vector direction, double maxDistance) {
-        // TODO custom target logic
+    public static RayTraceTargetResult rayTrace(Location start, Vector direction, double maxDistance) {
         return rayTrace(start, direction, maxDistance, null);
     }
 
@@ -36,11 +39,11 @@ public abstract class Target {
      * @param start
      * @param direction
      * @param maxDistance
-     * @param ignored Targets that meet this predicate will not be considered
+     * @param ignorePredicate Targets that meet this predicate will not be considered
      * @return
      */
-    public static RayTraceResult rayTrace(Location start, Vector direction, double maxDistance, Predicate<Target> ignored) {
-        // TODO custom target logic
+    public static RayTraceTargetResult rayTrace(Location start, Vector direction, double maxDistance, Predicate<Target> ignorePredicate) {
+        if (ignorePredicate == null) ignorePredicate = Predicate.isEqual(null);
 
         if (direction.lengthSquared() < 1e-5 || maxDistance <= 1e-5) return null;
 
@@ -51,7 +54,7 @@ public abstract class Target {
         }
 
         // Look for block collisions
-        RayTraceResult blockRayTrace = null;
+        RayTraceTargetResult blockRayTrace = null;
 
         // TODO further investigation into IllegalStateExceptions in BlockIterator
         BlockIterator bIterator;
@@ -69,12 +72,12 @@ public abstract class Target {
 
             Block block = bIterator.next();
             // First perform a rough collision check with BlockIterator
-            if ((ignored == null || !ignored.test(new BlockTarget(block))) && !block.isEmpty()) {
+            if ((!ignorePredicate.test(new BlockTarget(block))) && !block.isEmpty()) {
 
                 // Now check if the collision still occurs with the precise collision geometry of the block
                 RayTraceResult res = block.rayTrace(start, direction, maxDistance, FluidCollisionMode.ALWAYS);
                 if (res != null) {
-                    blockRayTrace = res;
+                    blockRayTrace = new RayTraceTargetResult(res, new BlockTarget(block));
                     break;
                 }
 
@@ -83,29 +86,50 @@ public abstract class Target {
         }
 
         // Look for entity collisions
-        RayTraceResult entityRayTrace = start.getWorld().rayTraceEntities(
+        final Predicate<Target> ignoreFinal = ignorePredicate;
+        RayTraceResult entityRT = start.getWorld().rayTraceEntities(
                 start,
                 direction,
                 maxDistance,
-                entity -> entity instanceof LivingEntity && (ignored == null || !ignored.test(new LivingEntityTarget((LivingEntity) entity)))
+                entity -> entity instanceof LivingEntity && (!ignoreFinal.test(new LivingEntityTarget((LivingEntity) entity)))
         );
+        RayTraceTargetResult entityRayTrace = entityRT == null
+                ? null
+                : new RayTraceTargetResult(entityRT, new LivingEntityTarget((LivingEntity) entityRT.getHitEntity()));
 
-        // Return closest RayTraceResult
-        return min(start, blockRayTrace, entityRayTrace);
+        // Look for custom target collisions
+        RayTraceTargetResult customRayTrace = min(start, customTargets.stream()
+                .filter(ignorePredicate.negate())
+                .map(target -> target.isHit(start, direction, maxDistance))
+                .collect(Collectors.toList()));
+
+
+        RayTraceTargetResult closest = min(start, blockRayTrace, entityRayTrace, customRayTrace);
+        return closest;
+    }
+
+    private static RayTraceTargetResult min(Location start, RayTraceTargetResult... results) {
+        return min(start, Arrays.asList(results));
+    }
+
+    private static RayTraceTargetResult min(Location start, Collection<RayTraceTargetResult> results) {
+        return results.stream().reduce(null, (r1, r2) -> min(start, r1, r2));
     }
 
     /**
-     * Returns the smaller of the two RayTraceResults
+     * Returns the smaller of the two RayTraceTargetResults
      * Only returns null if both are null
      * @param start Start location
-     * @param r1 First RayTraceResult
-     * @param r2 Second RayTraceResult
-     * @return The RayTraceResult closest to the start Location
+     * @param r1 First RayTraceTargetResult
+     * @param r2 Second RayTraceTargetResult
+     * @return The RayTraceTargetResult closest to the start Location
      */
-    private static RayTraceResult min(Location start, RayTraceResult r1, RayTraceResult r2) {
+    private static RayTraceTargetResult min(Location start, RayTraceTargetResult r1, RayTraceTargetResult r2) {
         if (r1 != null && r2 != null) {
             // Return closer collision
-            return r1.getHitPosition().distanceSquared(start.toVector()) < r2.getHitPosition().distanceSquared(start.toVector()) ? r1 : r2;
+            double r1Dist = r1.getRayTraceResult().getHitPosition().distanceSquared(start.toVector());
+            double r2Dist = r2.getRayTraceResult().getHitPosition().distanceSquared(start.toVector());
+            return r1Dist < r2Dist ? r1 : r2;
         } else if (r1 != null) {
             return r1;
         } else if (r2 != null){
@@ -115,7 +139,7 @@ public abstract class Target {
         }
     }
 
-    public static Target fromRayTrace(RayTraceResult rtResult) {
+    private static Target fromRayTrace(RayTraceResult rtResult) {
         // TODO custom target logic
         if (rtResult != null) {
             if (rtResult.getHitEntity() != null && rtResult.getHitEntity() instanceof LivingEntity) {
@@ -132,9 +156,13 @@ public abstract class Target {
     /**
      * @param ent The entity which fired the gun
      * @param damage The suggested damage to apply
-     * @return Should return true if the CustomTarget has been destroyed
+     * @param impact The impact information
+     * @param path The direction and magnitude (velocity) of the projectile when the impact occurred
+     * @param distance The total distance travelled by the projectile up until the impact
+     * @param velocity The velocity of the projectile at the time of impact
+     * @return The resulting path
      */
-    public abstract boolean onHit(Entity ent, double damage);
+    public abstract Vector onHit(Entity ent, double damage, RayTraceTargetResult impact, Vector path, double distance, double velocity);
 
     /**
      * @param start
@@ -142,7 +170,7 @@ public abstract class Target {
      * @param maxDistance
      * @return Returns where the given ray hits the target, null if it does not
      */
-    public abstract RayTraceResult isHit(Location start, Vector direction, double maxDistance);
+    public abstract RayTraceTargetResult isHit(Location start, Vector direction, double maxDistance);
 
     public abstract Location getLocation();
 

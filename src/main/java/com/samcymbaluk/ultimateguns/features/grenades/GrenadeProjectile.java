@@ -2,6 +2,7 @@ package com.samcymbaluk.ultimateguns.features.grenades;
 
 import com.samcymbaluk.ultimateguns.UltimateGuns;
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
+import com.samcymbaluk.ultimateguns.targets.RayTraceTargetResult;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.targets.BlockTarget;
 import net.minecraft.server.v1_14_R1.EntityArmorStand;
@@ -73,9 +74,9 @@ public class GrenadeProjectile {
         this.loc = start;
         grenade.onTick(start, tick);
 
-        RayTraceResult rtResult = Target.rayTrace(start, path, path.length(), rayTracePredicate());
+        RayTraceTargetResult rtResult = Target.rayTrace(start, path, path.length(), rayTracePredicate());
         Location newStart = rtResult != null
-                ? rtResult.getHitPosition().toLocation(start.getWorld())
+                ? rtResult.getRayTraceResult().getHitPosition().toLocation(start.getWorld())
                 : start.add(path.clone().normalize().multiply(path.length()));
 
         stand.setLocation(newStart.getX(), newStart.getY() - 0.75, newStart.getZ(), 0.0F, 0.0F);
@@ -144,10 +145,10 @@ public class GrenadeProjectile {
      * @param path
      * @param rtResult
      */
-    private void impactCalculations(Vector path, RayTraceResult rtResult) {
+    private void impactCalculations(Vector path, RayTraceTargetResult rtResult) {
 
-        BlockFace blockFace = rtResult.getHitBlockFace();
-        Target target = Target.fromRayTrace(rtResult);
+        BlockFace blockFace = rtResult.getRayTraceResult().getHitBlockFace();
+        Target target = rtResult.getTarget();
 
         if (blockFace != null) {
 

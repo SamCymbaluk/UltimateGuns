@@ -1,6 +1,7 @@
 package com.samcymbaluk.ultimateguns;
 
 import com.samcymbaluk.ultimateguns.targets.LivingEntityTarget;
+import com.samcymbaluk.ultimateguns.targets.RayTraceTargetResult;
 import com.samcymbaluk.ultimateguns.targets.Target;
 import com.samcymbaluk.ultimateguns.util.ProjectileCallback;
 import org.bukkit.Bukkit;
@@ -8,7 +9,6 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import java.util.HashSet;
@@ -68,14 +68,14 @@ public class UltimateGunsProjectile {
         Set<Target> ignoredTargets = new HashSet<>();
         ignoredTargets.add(ignored);
 
-        RayTraceResult rtResult;
+        RayTraceTargetResult rtResult;
         double tickElapsed = 0;
         double pathLength = path.length();
         // Loop while there is a target and there is still (simulated) tick time left
         while ((rtResult = Target.rayTrace(start, path, pathLength * (1 - tickElapsed), ignoredTargets::contains)) != null && tickElapsed < 0.99) {
-            Target target = Target.fromRayTrace(rtResult);
-            Vector newPath = callback.handleImpact(rtResult, target, path.clone(), totalDistance + rtResult.getHitPosition().distance(start.toVector()));
-            Location newStart = rtResult.getHitPosition().toLocation(loc.getWorld());
+            Target target = rtResult.getTarget();
+            Vector newPath = callback.handleImpact(rtResult, path.clone(), totalDistance + rtResult.getRayTraceResult().getHitPosition().distance(start.toVector()), pathLength);
+            Location newStart = rtResult.getRayTraceResult().getHitPosition().toLocation(loc.getWorld());
 
             callback.handleStep(start, newStart.clone().subtract(start).toVector(), pathLength);
 

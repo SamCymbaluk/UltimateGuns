@@ -17,13 +17,13 @@ public class BlockTarget extends Target {
     }
 
     @Override
-    public boolean onHit(Entity ent, double damage) {
-        return false;
+    public Vector onHit(Entity ent, double damage, RayTraceTargetResult impact, Vector path, double distance, double velocity) {
+        return path;
     }
 
     @Override
-    public RayTraceResult isHit(Location start, Vector direction, double maxDistance) {
-        return block.rayTrace(start, direction, maxDistance, FluidCollisionMode.ALWAYS);
+    public RayTraceTargetResult isHit(Location start, Vector direction, double maxDistance) {
+        return new RayTraceTargetResult(block.rayTrace(start, direction, maxDistance, FluidCollisionMode.ALWAYS), this);
     }
 
     @Override

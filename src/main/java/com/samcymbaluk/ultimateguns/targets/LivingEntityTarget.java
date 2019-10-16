@@ -17,17 +17,17 @@ public class LivingEntityTarget extends Target {
     }
 
     @Override
-    public boolean onHit(Entity ent, double damage) {
+    public Vector onHit(Entity ent, double damage, RayTraceTargetResult impact, Vector path, double distance, double velocity) {
         entity.damage(damage, ent);
         entity.setNoDamageTicks(0);
 
-        return entity.isDead();
+        return path;
     }
 
     @Override
-    public RayTraceResult isHit(Location start, Vector direction, double maxDistance) {
+    public RayTraceTargetResult isHit(Location start, Vector direction, double maxDistance) {
         if (start.getWorld().equals(entity.getWorld())) {
-            return entity.getBoundingBox().rayTrace(start.toVector(), direction, maxDistance);
+            return new RayTraceTargetResult(entity.getBoundingBox().rayTrace(start.toVector(), direction, maxDistance), this);
         }
         return null;
     }

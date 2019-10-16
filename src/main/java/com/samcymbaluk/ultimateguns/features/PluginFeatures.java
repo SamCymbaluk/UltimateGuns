@@ -5,6 +5,7 @@ import com.samcymbaluk.ultimateguns.config.ConfigLoader;
 import com.samcymbaluk.ultimateguns.features.grenades.frag.FragFeature;
 import com.samcymbaluk.ultimateguns.features.grenades.gas.GasFeature;
 import com.samcymbaluk.ultimateguns.features.guns.GunFeature;
+import com.samcymbaluk.ultimateguns.features.shield.ShieldFeature;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class PluginFeatures {
         setupFeature(new FragFeature());
         setupFeature(new GasFeature());
         setupFeature(new GunFeature());
+        setupFeature(new ShieldFeature());
     }
 
     private void setupFeature(PluginFeature feature) {
