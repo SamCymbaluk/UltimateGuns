@@ -63,4 +63,11 @@ public class LivingEntityTarget extends Target {
     public int hashCode() {
         return entity.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "LivingEntityTarget{" +
+                "entity=" + entity +
+                '}';
+    }
 }

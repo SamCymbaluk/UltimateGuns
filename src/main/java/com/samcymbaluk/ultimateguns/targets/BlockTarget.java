@@ -69,4 +69,11 @@ public class BlockTarget extends Target {
     public int hashCode() {
         return block.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "BlockTarget{" +
+                "block=" + block +
+                '}';
+    }
 }

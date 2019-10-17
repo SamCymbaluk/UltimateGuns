@@ -22,5 +22,4 @@ public class PlayerListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         UltimateGuns.getInstance().removeGunPlayer(event.getPlayer());
     }
-
 }

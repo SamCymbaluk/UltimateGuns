@@ -6,6 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockIterator;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
@@ -53,9 +54,14 @@ public abstract class Target {
             start.add(0.001, 0.001, 0.001);
         }
 
-        // Look for block collisions
-        RayTraceTargetResult blockRayTrace = null;
+        RayTraceTargetResult blockRayTrace = rayTraceBlocks(start, direction, maxDistance, ignorePredicate);
+        RayTraceTargetResult entityRayTrace = rayTraceEntities(start, direction, maxDistance, ignorePredicate);
+        RayTraceTargetResult customRayTrace = rayTraceCustomTargets(start, direction, maxDistance, ignorePredicate);
 
+        return min(start, blockRayTrace, entityRayTrace, customRayTrace);
+    }
+
+    public static RayTraceTargetResult rayTraceBlocks(Location start, Vector direction, double maxDistance, Predicate<Target> ignorePredicate) {
         // TODO further investigation into IllegalStateExceptions in BlockIterator
         BlockIterator bIterator;
         try {
@@ -74,38 +80,44 @@ public abstract class Target {
             // First perform a rough collision check with BlockIterator
             if ((!ignorePredicate.test(new BlockTarget(block))) && !block.isEmpty()) {
 
-                // Now check if the collision still occurs with the precise collision geometry of the block
-                RayTraceResult res = block.rayTrace(start, direction, maxDistance, FluidCollisionMode.ALWAYS);
+                // Secondary rough check with the simplified block geometry
+                RayTraceResult res = (block.isLiquid() ? BoundingBox.of(block) : block.getBoundingBox()).rayTrace(start.toVector(), direction, maxDistance);
                 if (res != null) {
-                    blockRayTrace = new RayTraceTargetResult(res, new BlockTarget(block));
-                    break;
+                    // Now check if the collision still occurs with the precise collision geometry of the block
+                    // TODO Block#rayTrace broken (https://hub.spigotmc.org/jira/browse/SPIGOT-5370)
+                    // This is why we must only perform the Block#rayTrace with a start location already within the block
+                    Location newStart = res.getHitPosition().toLocation(start.getWorld());
+                    double newMaxDistance = maxDistance - start.distance(newStart);
+                    res = block.rayTrace(newStart, direction, newMaxDistance, FluidCollisionMode.ALWAYS);
+
+                    // If Block#rayTrace worked correctly, block == res.getHitBlock() should always be true
+                    if (res != null && block.equals(res.getHitBlock())) {
+                        return new RayTraceTargetResult(res, new BlockTarget(block));
+                    }
                 }
 
             }
 
         }
 
-        // Look for entity collisions
-        final Predicate<Target> ignoreFinal = ignorePredicate;
+        return null;
+    }
+
+    public static RayTraceTargetResult rayTraceEntities(Location start, Vector direction, double maxDistance, Predicate<Target> ignorePredicate) {
         RayTraceResult entityRT = start.getWorld().rayTraceEntities(
                 start,
                 direction,
                 maxDistance,
-                entity -> entity instanceof LivingEntity && (!ignoreFinal.test(new LivingEntityTarget((LivingEntity) entity)))
+                entity -> entity instanceof LivingEntity && (!ignorePredicate.test(new LivingEntityTarget((LivingEntity) entity)))
         );
-        RayTraceTargetResult entityRayTrace = entityRT == null
-                ? null
-                : new RayTraceTargetResult(entityRT, new LivingEntityTarget((LivingEntity) entityRT.getHitEntity()));
+        return entityRT == null ? null : new RayTraceTargetResult(entityRT, new LivingEntityTarget((LivingEntity) entityRT.getHitEntity()));
+    }
 
-        // Look for custom target collisions
-        RayTraceTargetResult customRayTrace = min(start, customTargets.stream()
+    public static RayTraceTargetResult rayTraceCustomTargets(Location start, Vector direction, double maxDistance, Predicate<Target> ignorePredicate) {
+        return min(start, customTargets.stream()
                 .filter(ignorePredicate.negate())
                 .map(target -> target.isHit(start, direction, maxDistance))
                 .collect(Collectors.toList()));
-
-
-        RayTraceTargetResult closest = min(start, blockRayTrace, entityRayTrace, customRayTrace);
-        return closest;
     }
 
     private static RayTraceTargetResult min(Location start, RayTraceTargetResult... results) {

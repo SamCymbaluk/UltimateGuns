@@ -47,12 +47,14 @@ public class UltimateGunsProjectile {
     public void start(Location loc, Vector direction, ProjectileCallback callback) {
         this.loc = loc;
         this.callback = callback;
+        Set<Target> ignored = new HashSet<>();
+        if (ignoreOwner) ignored.add(new LivingEntityTarget(owner));
 
-        step(loc.clone(), direction.clone().normalize().multiply(initialVelocity), 0, ignoreOwner ? new LivingEntityTarget(owner) : null);
+        step(loc.clone(), direction.clone().normalize().multiply(initialVelocity), 0, ignored);
 
     }
 
-    private void step(Location start, Vector path, double totalDistance, Target ignored) {
+    private void step(Location start, Vector path, double totalDistance, Set<Target> ignored) {
         double distance = path.length();
         if (totalDistance + distance > maxDistance) {
             distance = maxDistance - totalDistance;
@@ -65,14 +67,11 @@ public class UltimateGunsProjectile {
             return;
         }
 
-        Set<Target> ignoredTargets = new HashSet<>();
-        ignoredTargets.add(ignored);
-
         RayTraceTargetResult rtResult;
         double tickElapsed = 0;
         double pathLength = path.length();
         // Loop while there is a target and there is still (simulated) tick time left
-        while ((rtResult = Target.rayTrace(start, path, pathLength * (1 - tickElapsed), ignoredTargets::contains)) != null && tickElapsed < 0.99) {
+        while ((rtResult = Target.rayTrace(start, path, pathLength * (1 - tickElapsed), ignored::contains)) != null && tickElapsed < 1) {
             Target target = rtResult.getTarget();
             Vector newPath = callback.handleImpact(rtResult, path.clone(), totalDistance + rtResult.getRayTraceResult().getHitPosition().distance(start.toVector()), pathLength);
             Location newStart = rtResult.getRayTraceResult().getHitPosition().toLocation(loc.getWorld());
@@ -86,8 +85,7 @@ public class UltimateGunsProjectile {
             tickElapsed += newStart.toVector().subtract(start.toVector()).length() / pathLength;
 
             // Update iteration vars
-            ignoredTargets.add(target);
-            ignored = target;
+            ignored.add(target);
             path = newPath;
             pathLength = path.length();
             start = newStart;
@@ -112,9 +110,8 @@ public class UltimateGunsProjectile {
         Location newStart = start;
         Vector newPath = path;
         double newTotalDistance = totalDistance + distance;
-        Target newIgnored = ignored;
         Bukkit.getScheduler().scheduleSyncDelayedTask(UltimateGuns.getInstance(), () -> {
-            if (!killed) step(newStart, newPath, newTotalDistance, newIgnored);
+            if (!killed) step(newStart, newPath, newTotalDistance, ignored);
         }, 1);
     }
 
